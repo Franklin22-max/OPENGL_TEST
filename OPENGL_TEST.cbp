@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="OPENGL_TEST" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/OPENGL_TEST" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add directory="include" />
+					<Add directory="Dependencies/glfw/include" />
+					<Add directory="Dependencies/glad/include" />
+					<Add directory="Dependencies/soil/include" />
+					<Add directory="Dependencies/glm" />
+				</Compiler>
+				<Linker>
+					<Add option="-lglfw3dll -lglfw3 -lopengl32 -lgdi32" />
+					<Add library="Dependencies/glfw/lib/libglfw3dll.a" />
+					<Add library="Dependencies/glfw/lib/libglfw3.a" />
+					<Add library="C:/Program Files (x86)/CodeBlocks/MinGW/lib/libopengl32.a" />
+					<Add library="C:/Program Files (x86)/CodeBlocks/MinGW/lib/libgdi32.a" />
+					<Add directory="Dependencies/glfw/lib" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/OPENGL_TEST" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add directory="include" />
+					<Add directory="Dependencies/glfw/include" />
+					<Add directory="Dependencies/glad/include" />
+					<Add directory="Dependencies/soil/include" />
+					<Add directory="Dependencies/glm" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-lglfw3dll -lglfw3 -lopengl32 -lgdi32" />
+					<Add library="Dependencies/glfw/lib/libglfw3dll.a" />
+					<Add library="Dependencies/glfw/lib/libglfw3.a" />
+					<Add library="C:/Program Files (x86)/CodeBlocks/MinGW/lib/libopengl32.a" />
+					<Add library="C:/Program Files (x86)/CodeBlocks/MinGW/lib/libgdi32.a" />
+					<Add directory="Dependencies/glfw/lib" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-std=c++1z" />
+			<Add option="-Wwrite-strings" />
+			<Add directory="Dependencies/glfw/include" />
+			<Add directory="Dependencies/glad/include" />
+			<Add directory="Dependencies/soil/include" />
+			<Add directory="Dependencies/glm" />
+		</Compiler>
+		<Linker>
+			<Add option="-lglfw3dll -lglfw3 -lopengl32 -lgdi32" />
+			<Add library="Dependencies/glfw/lib/libglfw3dll.a" />
+			<Add library="Dependencies/glfw/lib/libglfw3.a" />
+			<Add library="C:/Program Files (x86)/CodeBlocks/MinGW/lib/libopengl32.a" />
+			<Add library="C:/Program Files (x86)/CodeBlocks/MinGW/lib/libgdi32.a" />
+			<Add directory="Dependencies/glfw/lib" />
+		</Linker>
+		<Unit filename="Dependencies/glad/src/glad.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Dependencies/soil/src/image_dxt.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Dependencies/soil/src/image_helper.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Dependencies/soil/src/soil.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Dependencies/soil/src/stb_image_aug.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="fragment_shader.vert" />
+		<Unit filename="include/BufferOBJ.h" />
+		<Unit filename="include/Camera.h" />
+		<Unit filename="include/Renderer.h" />
+		<Unit filename="include/Shader.h" />
+		<Unit filename="include/Texture.h" />
+		<Unit filename="lightingFragmentShader.vert" />
+		<Unit filename="lightingVertexShader.vert" />
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="vertex_shader.vert" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
