@@ -43,6 +43,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="-mwindows" />
 					<Add option="-lglfw3dll -lglfw3 -lopengl32 -lgdi32" />
 					<Add library="Dependencies/glfw/lib/libglfw3dll.a" />
 					<Add library="Dependencies/glfw/lib/libglfw3.a" />
@@ -87,6 +88,8 @@
 		<Unit filename="fragment_shader.vert" />
 		<Unit filename="include/BufferOBJ.h" />
 		<Unit filename="include/Camera.h" />
+		<Unit filename="include/Light.h" />
+		<Unit filename="include/Material.h" />
 		<Unit filename="include/Renderer.h" />
 		<Unit filename="include/Shader.h" />
 		<Unit filename="include/Texture.h" />

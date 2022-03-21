@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include <glad/glad.h> // Include glew to get all the required OpenGL  headers
+#include "Material.h"
 
 namespace be
 {
@@ -107,28 +108,48 @@ class Shader
             glUseProgram(this->_Program);
         }
 
-        static void linkUnform4fv(GLuint shaderProgram,const std::string uniformName, const GLfloat* value, GLsizei count = 1, GLboolean transpose = GL_FALSE)
+        static void linkUnformMatrix4fv(Shader& shader,const std::string uniformName, const GLfloat* value, GLsizei count = 1, GLboolean transpose = GL_FALSE)
         {
-            GLuint _uniform = glGetUniformLocation(shaderProgram, uniformName.c_str());
+            GLuint _uniform = glGetUniformLocation(shader.Program(), uniformName.c_str());
             glUniformMatrix4fv(_uniform, count, transpose, value);
         }
 
-        static void linkUnform3fv(GLuint shaderProgram,const std::string uniformName, const GLfloat* value, GLsizei count = 1, GLboolean transpose = GL_FALSE)
+        static void linkUnformMatrix3fv(Shader& shader,const std::string uniformName, const GLfloat* value, GLsizei count = 1, GLboolean transpose = GL_FALSE)
         {
-            GLuint _uniform = glGetUniformLocation(shaderProgram, uniformName.c_str());
+            GLuint _uniform = glGetUniformLocation(shader.Program(), uniformName.c_str());
             glUniformMatrix3fv(_uniform, count, transpose, value);
         }
 
-        static void linkUnform3f(GLuint shaderProgram,const std::string uniformName, glm::vec3* value)
+        static void linkUnform3f(Shader& shader,const std::string uniformName, glm::vec3* value)
         {
-            GLuint _uniform = glGetUniformLocation(shaderProgram, uniformName.c_str());
+            GLuint _uniform = glGetUniformLocation(shader.Program(), uniformName.c_str());
             glUniform3f(_uniform, value->x, value->y, value->z);
         }
 
-        static void linkUnform4f(GLuint shaderProgram,const std::string uniformName, glm::vec4* value)
+        static void linkUnform4f(Shader& shader,const std::string uniformName, glm::vec4* value)
         {
-            GLuint _uniform = glGetUniformLocation(shaderProgram, uniformName.c_str());
+            GLuint _uniform = glGetUniformLocation(shader.Program(), uniformName.c_str());
             glUniform4f(_uniform, value->x, value->y, value->z, value->w);
+        }
+
+        static void linkUnform2f(Shader& shader,const std::string uniformName, glm::vec2* value)
+        {
+            GLuint _uniform = glGetUniformLocation(shader.Program(), uniformName.c_str());
+            glUniform2f(_uniform, value->x, value->y);
+        }
+
+        static void linkUnform1f(Shader& shader,const std::string uniformName, float value)
+        {
+            GLuint _uniform = glGetUniformLocation(shader.Program(), uniformName.c_str());
+            glUniform1f(_uniform, value);
+        }
+
+        static void LinkMaterial(be::Shader& shader, Material* material)
+        {
+            be::Shader::linkUnform3f(shader,"material.ambient",&material->ambient);
+            be::Shader::linkUnform3f(shader,"material.diffuse",&material->diffuse);
+            be::Shader::linkUnform3f(shader,"material.specular",&material->specular);
+            be::Shader::linkUnform1f(shader,"material.shininess",material->shininess * 128.0f);
         }
 };
 }
