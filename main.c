@@ -27,7 +27,7 @@ GLfloat lastX = 400;
 //CAMERA
 be::Camera camera;
 
-be::Brass brass;
+be::Green_Plastic plastic;
 
 GLboolean firstMouse = true;
 
@@ -175,7 +175,7 @@ int main(int args, char** argv)
     glEnable(GL_DEPTH_TEST);
 
     int width, height;
-    unsigned char* image = SOIL_load_image(R"(C:\Users\Franklin\Pictures\color show.jpg)", &width, &height, 0,SOIL_LOAD_RGB);
+    unsigned char* image = SOIL_load_image(R"(utility\images\container2.png)", &width, &height, 0,SOIL_LOAD_RGB);
 
 
     // GENERATE A TEXTURE
@@ -207,9 +207,9 @@ int main(int args, char** argv)
     be::Shader lampShader("lightingVertexShader.vert","lightingFragmentShader.vert");
     be::vertexArray lva;
     lva.Bind();
-    lva.vertexAttribPointer(0,3,GL_FLOAT, GL_FALSE, 6* sizeof(GLfloat),(GLvoid*)0);
+    lva.vertexAttribPointer(0,3,GL_FLOAT, GL_FALSE, 8* sizeof(GLfloat),(GLvoid*)0);
 
-    //glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glm::mat4 view = identity;
@@ -233,7 +233,7 @@ int main(int args, char** argv)
 
         ourShader.Use();
         be::Shader::linkUnform3f(ourShader,"viewPos",&camera.Position);
-        be::Shader::LinkMaterial(ourShader,&brass);
+        be::Shader::LinkMaterial(ourShader,&plastic);
 
         be::Shader::linkUnform3f(ourShader,"light.ambient",&myLight.ambient);
         be::Shader::linkUnform3f(ourShader,"light.diffuse",&myLight.diffuse);
@@ -287,4 +287,3 @@ int main(int args, char** argv)
     glfwTerminate();
     return 0;
 }
-
