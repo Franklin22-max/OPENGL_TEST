@@ -13,7 +13,7 @@ out vec3 FragPos;
 
 void main()
 {
-    gl_Position = projection* view * model * vec4(position,1.0f);
+    gl_Position = projection * view * model * vec4(position,1.0f);
     FragPos = vec3(model * vec4(position, 1.0f));// get fragment position in world space
     Normal = mat3(transpose(inverse(model))) * normal;
     TexCoords = vec2(texCoord.x, 1.0f - texCoord.y);

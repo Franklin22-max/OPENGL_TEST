@@ -144,10 +144,19 @@ class Shader
             glUniform1f(_uniform, value);
         }
 
-        static void LinkMaterial(be::Shader& shader, Material* material)
+        static void linkUnform1i(Shader& shader, const std::string uniformName, int value)
         {
-            //be::Shader::linkUnform3f(shader,"material.ambient",&material->ambient);
-            //be::Shader::linkUnform3f(shader,"material.diffuse",&material->diffuse);
+            GLuint _uniform = glGetUniformLocation(shader.Program(), uniformName.c_str());
+            glUniform1i(_uniform, value);
+        }
+
+        static void LinkMaterial(be::Shader& shader, Material*
+            
+            
+           material)
+        {
+            be::Shader::linkUnform3f(shader,"material.ambient",&material->ambient);
+            be::Shader::linkUnform3f(shader,"material.diffuse",&material->diffuse);
             be::Shader::linkUnform3f(shader,"material.specular",&material->specular);
             be::Shader::linkUnform1f(shader,"material.shininess",material->shininess * 128.0f);
         }

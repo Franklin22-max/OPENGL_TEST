@@ -1,0 +1,18 @@
+﻿  Source.cpp
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TUTORIAL\include\Material.h(38,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TUTORIAL\include\Material.h(49,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TUTORIAL\include\Material.h(60,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TUTORIAL\include\Material.h(71,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TUTORIAL\include\Material.h(82,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TUTORIAL\include\Material.h(93,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TUTORIAL\include\Material.h(104,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TUTORIAL\include\Material.h(115,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TUTORIAL\include\Material.h(128,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TUTORIAL\include\Material.h(139,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TUTORIAL\include\Material.h(150,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TUTORIAL\Source.cpp(72,21): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TUTORIAL\Source.cpp(73,21): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TUTORIAL\Source.cpp(76,25): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TUTORIAL\Source.cpp(77,25): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TUTORIAL\Source.cpp(240,30): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
+  OPENGL_TUTORIAL.vcxproj -> C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TUTORIAL\Debug\OPENGL_TUTORIAL.exe

@@ -1,0 +1,14 @@
+﻿Source.obj : error LNK2019: unresolved external symbol glfwInit referenced in function main
+Source.obj : error LNK2019: unresolved external symbol glfwTerminate referenced in function main
+Source.obj : error LNK2019: unresolved external symbol glfwWindowHint referenced in function main
+Source.obj : error LNK2019: unresolved external symbol glfwCreateWindow referenced in function main
+Source.obj : error LNK2019: unresolved external symbol glfwWindowShouldClose referenced in function main
+Source.obj : error LNK2019: unresolved external symbol glfwSetWindowShouldClose referenced in function "void __cdecl key_callback(struct GLFWwindow *,int,int,int,int)" (?key_callback@@YAXPEAUGLFWwindow@@HHHH@Z)
+Source.obj : error LNK2019: unresolved external symbol glfwPollEvents referenced in function main
+Source.obj : error LNK2019: unresolved external symbol glfwSetKeyCallback referenced in function main
+Source.obj : error LNK2019: unresolved external symbol glfwSetCursorPosCallback referenced in function main
+Source.obj : error LNK2019: unresolved external symbol glfwGetTime referenced in function main
+Source.obj : error LNK2019: unresolved external symbol glfwMakeContextCurrent referenced in function main
+Source.obj : error LNK2019: unresolved external symbol glfwSwapBuffers referenced in function main
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TUTORIAL\Dependencies\glfw\lib-vc2017\glfw3.lib : warning LNK4272: library machine type 'x86' conflicts with target machine type 'x64'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TUTORIAL\x64\Debug\OPENGL_TUTORIAL.exe : fatal error LNK1120: 12 unresolved externals

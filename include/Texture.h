@@ -3,33 +3,50 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <SOIL/SOIL.h>
+#include <string>
+#include "../vendor/stb_image/stb_image.h"
+
 
 namespace be
 {
 
 
-struct Texture
+class Texture
 {
     GLuint texture;
-    GLenum target;
+public:
 
-    Texture()
+    Texture(const std::string img_path)
     {
-        glGenTextures(1,&this->texture);
-        target = GL_TEXTURE_2D;
+
+        int width, height, BPP;
+
+        stbi_set_flip_vertically_on_load(true);
+        unsigned char* image = stbi_load(img_path.c_str(), &width, &height, &BPP, 4);
+
+        glGenTextures(1, &texture);
+
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        if(image)
+            stbi_image_free(image);
     }
 
-    void Bind()
+    void Bind(unsigned int slot = 0)
     {
-        glBindTexture(target, texture);
+        glActiveTexture(GL_TEXTURE0 + slot);
+        glBindTexture(GL_TEXTURE_2D, texture);
     }
 
 
 
     void unbind()
     {
-        glBindTexture(target,0);
+        glBindTexture(GL_TEXTURE_2D,0);
     }
 };
 
