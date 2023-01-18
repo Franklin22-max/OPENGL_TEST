@@ -24,7 +24,7 @@ namespace be
         Light(glm::vec3 position)
         :position(position)
         {
-            ambient = glm::vec3(0.1f,0.1f,0.1f);
+            ambient = glm::vec3(0.35f,0.35f,0.35f);
             diffuse = glm::vec3(1.0f,1.0f,1.0f);
             specular = glm::vec3(1.0f,1.0f,1.0f);
         }
@@ -32,7 +32,7 @@ namespace be
         Light()
         {
             position = glm::vec3(0, 0, 0);
-            ambient = glm::vec3(0.1f,0.1f,0.1f);
+            ambient = glm::vec3(0.35f, 0.35f, 0.35f);
             diffuse = glm::vec3(1.0f,1.0f,1.0f);
             specular = glm::vec3(1.0f,1.0f,1.0f);
         }

@@ -2,10 +2,20 @@
 #include <GLFW/glfw3.h>
 
 #include <math.h>
+#include <chrono>
+#include <thread>
+
+
+
 //#include <SOIL/SOIL.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 
 
 #include "Shader.h"
@@ -23,6 +33,7 @@
 
 GLfloat deltaTime = 0.0f; // Time between current frame and last frame
 GLfloat lastFrame = 0.0f; // Time of last frame
+GLfloat frameRate = 60.0f; // Time of last frame
 GLfloat lastY = 300;
 GLfloat lastX = 400;
 
@@ -81,6 +92,19 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
         firstMouse = true;
 }
 
+void doRotation()
+{
+    if (keys[GLFW_KEY_UP] == GLFW_PRESS)
+        camera.ProcessMouseMovement(0,500 * deltaTime, false);
+    if (keys[GLFW_KEY_DOWN] == GLFW_PRESS)
+        camera.ProcessMouseMovement(0,-500 * deltaTime, false);
+    if (keys[GLFW_KEY_LEFT] == GLFW_PRESS)
+        camera.ProcessMouseMovement(-500 * deltaTime,0, false);
+    if (keys[GLFW_KEY_RIGHT] == GLFW_PRESS)
+        camera.ProcessMouseMovement(500 * deltaTime,0, false);
+}
+
+
 void doMovement()
 {
     if (keys[GLFW_KEY_W] == GLFW_PRESS)
@@ -96,8 +120,18 @@ void doMovement()
 
 
 
+
+using HRC_time_point = std::chrono::time_point<std::chrono::high_resolution_clock>;
+
+
+
+
 int main(int args, char** argv)
 {
+
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile("./", aiProcess_Triangulate |
+        aiProcess_FlipUVs);
 
     GLuint indices[] = { // Note that we start from 0!
     0, 1, 3, // First Triangle
@@ -160,6 +194,7 @@ int main(int args, char** argv)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
+
     GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "OpenGL", nullptr, nullptr);
 
     if (window == nullptr)
@@ -220,18 +255,28 @@ int main(int args, char** argv)
     be::Shader::linkUnform3f(cubeShader, "viewPos", &camera.Position);
     be::Shader::LinkMaterial(cubeShader, &brass);
 
+    // general light
     be::Shader::linkUnform3f(cubeShader, "light.ambient", &myLight.ambient);
     be::Shader::linkUnform3f(cubeShader, "light.diffuse", &myLight.diffuse);
     be::Shader::linkUnform3f(cubeShader, "light.specular", &myLight.specular);
     be::Shader::linkUnform3f(cubeShader, "light.position", &myLight.position);
 
+    // point light
+    be::Shader::linkUnform1f(cubeShader, "p_light.constant", 1.0f);
+    be::Shader::linkUnform1f(cubeShader, "p_light.linear", 0.045f);
+    be::Shader::linkUnform1f(cubeShader, "p_light.quadratic", 0.0075);
+
+    
+
+    // material
     be::Shader::linkUnform1i(cubeShader, "material.specular", 1);
+    be::Shader::linkUnform1f(cubeShader, "material.shininess",32.0f);
 
 
     std::vector<glm::vec3> cubePos;
 
     for (int i = 0; i < 10; i++)
-        cubePos.push_back({ -2 * (rand() % 5) + 5, -2 * (rand() % 5) + 5, -4.f - (rand() % 10) });
+        cubePos.push_back({ -2 * (rand() % 5) + 5, -2 * (rand() % 5) + 5, -2*i - (rand() % 15) });
 
     // Program loop
     while (!glfwWindowShouldClose(window))
@@ -241,6 +286,11 @@ int main(int args, char** argv)
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+        if (deltaTime < 1/frameRate)
+        {
+            std::this_thread::sleep_for(std::chrono::duration<std::chrono::seconds::rep, std::chrono::seconds::period>(std::chrono::seconds::rep(1 / frameRate - deltaTime)));
+        }
+
         // Check and call events
         glfwPollEvents();
 
@@ -248,6 +298,7 @@ int main(int args, char** argv)
         be::Renderer::Clear();
 
         doMovement();
+        doRotation();
 
 
         
@@ -279,6 +330,11 @@ int main(int args, char** argv)
         be::Shader::linkUnformMatrix4fv(cubeShader, "projection", glm::value_ptr(projection), 1, GL_FALSE);
 
         
+        // spotlight
+        be::Shader::linkUnform3f(cubeShader, "s_light.position", &camera.Position);
+        be::Shader::linkUnform3f(cubeShader, "s_light.direction", &camera.Front);
+        be::Shader::linkUnform1f(cubeShader, "s_light.cutOff", glm::cos(glm::radians(5.f)));
+        be::Shader::linkUnform1f(cubeShader, "s_light.outerCutOff", glm::cos(glm::radians(15.f)));
 
         for (int i = 0; i < 10; i++)
         {
