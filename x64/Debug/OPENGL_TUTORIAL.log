@@ -1,23 +1,26 @@
-﻿  glad.c
-  Source.cpp
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(38,1): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(49,1): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(60,1): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(71,1): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(82,1): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(93,1): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(104,1): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(115,1): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(128,1): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(139,1): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(150,1): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(83,21): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(84,21): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(87,25): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(88,25): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(267,69): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(285,30): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
-  stb_image.cpp
-  Generating Code...
+﻿  Source.cpp
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(40,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(51,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(62,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(73,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(84,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(95,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(106,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(117,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(130,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(141,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(152,1): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\StringTools.h(14,42): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\StringTools.h(33,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Texture.h(34,44): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Model.h(120,30): warning C4244: 'argument': conversion from 'GLuint' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Model.h(135,1): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Model.h(227,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Model.h(256,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(237,30): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(367,21): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(368,21): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(371,25): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(372,25): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
 LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   OPENGL_TUTORIAL.vcxproj -> C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\x64\Debug\OPENGL_TUTORIAL.exe

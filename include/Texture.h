@@ -5,51 +5,77 @@
 #include <GLFW/glfw3.h>
 #include <string>
 #include "../vendor/stb_image/stb_image.h"
+#include <filesystem>
+#include "StringTools.h"
 
 
-namespace be
+
+inline GLuint TextureFromFile(std::string name, std::string directory)
 {
+    // append name o file to directory
+    std::string path = directory +  '/' + name;
 
 
-class Texture
-{
     GLuint texture;
-public:
+    int width, height, BPP;
 
-    Texture(const std::string img_path)
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* image = stbi_load(path.c_str(), &width, &height, &BPP, 4);
+
+    if (!image)
     {
+        using recursive_directory_iterator = std::filesystem::recursive_directory_iterator;
+        std::filesystem::path p(name);
+        p.make_preferred();
 
-        int width, height, BPP;
+        name = to_string(p);
+        name = strip_edge(name, '"');
 
-        stbi_set_flip_vertically_on_load(true);
-        unsigned char* image = stbi_load(img_path.c_str(), &width, &height, &BPP, 4);
+        int index = name.find_last_of("\\");
 
-        glGenTextures(1, &texture);
+        if (index == name.npos)
+            index = 0;
 
-        glBindTexture(GL_TEXTURE_2D, texture);
+        std::string new_name = name.substr(index + 1, name.length() - index);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-        glGenerateMipmap(GL_TEXTURE_2D);
+        for (const auto& dirEntry : recursive_directory_iterator(directory))
+        {
+            
+            std::string hold = to_string(dirEntry);
 
-        if(image)
-            stbi_image_free(image);
+            hold = strip_edge(hold, '"');
+            hold = replace_all_in(hold, R"(\\)", R"(\)");
+
+            if (hold.find(new_name) != name.npos)
+            {
+
+                image = stbi_load(hold.c_str(), &width, &height, &BPP, 4);
+                std::cout << hold << std::endl;
+                if(!image)
+                    std::cout << "Couldnt load texture" + directory + "\n";
+                break;
+            }
+
+        }
+
+       
     }
+        
 
-    void Bind(unsigned int slot = 0)
-    {
-        glActiveTexture(GL_TEXTURE0 + slot);
-        glBindTexture(GL_TEXTURE_2D, texture);
-    }
+    glGenTextures(1, &texture);
 
+    glBindTexture(GL_TEXTURE_2D, texture);
 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glGenerateMipmap(GL_TEXTURE_2D);
 
-    void unbind()
-    {
-        glBindTexture(GL_TEXTURE_2D,0);
-    }
-};
+    if (image)
+        stbi_image_free(image);
 
+    return texture;
 }
+
+
 
 #endif // TEXTURE_H_INCLUDED

@@ -65,5 +65,16 @@
     <ClInclude Include="include\Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\StringTools.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".gitignore" />
+    <None Include="..\assimp\assimp\bin\Release\assimp-vc143-mt.dll" />
+    <None Include="include\shader\meshVertexShader.vert" />
+    <None Include="include\shader\meshFragmentShader.frag" />
+    <None Include="include\shader\lightingFragmentShader.vert" />
+    <None Include="include\shader\lightingVertexShader.vert" />
   </ItemGroup>
 </Project>

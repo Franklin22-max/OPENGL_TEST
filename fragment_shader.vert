@@ -3,8 +3,8 @@
 
 struct Material
 {
-    sampler2D diffuse;
-    sampler2D specular;
+    sampler2D texture_diffuse1;
+    sampler2D texture_specular1;
     float shininess;
 };
 
@@ -76,19 +76,22 @@ vec4 testPointLight()
 {
 
     // ambient
-    vec3 ambient = light.ambient *  vec3(texture(material.diffuse,TexCoords));
-   
+    vec4 ambient = vec4(light.ambient,1.0f) * texture(material.texture_diffuse1,TexCoords);
+
     // Diffuse
     vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(light.position - FragPos);
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = light.diffuse * diff *  vec3(texture(material.diffuse,TexCoords));
+
+    vec4 diffuse = vec4(light.diffuse * diff,1.0f) * texture(material.texture_diffuse1,TexCoords);
+
+        
 
     // Specular
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = light.specular * spec * vec3(texture(material.specular,TexCoords));
+    vec4 specular = vec4(light.specular * spec, 1.0f) * texture(material.texture_specular1,TexCoords);
 
     // point lighting
     float distance = length(light.position -  FragPos);
@@ -98,9 +101,11 @@ vec4 testPointLight()
     diffuse *= attenuation;
     specular *= attenuation;
 
-    vec3 result = ambient + diffuse + specular;
+    vec4 result = ambient + diffuse + specular;
 
-    return  (vec4(result,1.0));
+    
+
+    return result;
 }
 
 
@@ -115,18 +120,20 @@ vec4 testSpotLight()
    vec3 lightDir = normalize(s_light.position - FragPos);
 
     // ambient
-    vec3 ambient = light.ambient *  vec3(texture(material.diffuse,TexCoords));
+    vec4 ambient = vec4(light.ambient,1.0f) *  texture(material.texture_diffuse1,TexCoords);
    
     // Diffuse
     vec3 norm = normalize(Normal);
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = light.diffuse * diff *  vec3(texture(material.diffuse,TexCoords));
+    vec4 diffuse = vec4(light.diffuse * diff,1.0f) * texture(material.texture_diffuse1,TexCoords);
+    
+
 
     // Specular
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = light.specular * spec * vec3(texture(material.specular,TexCoords));
+    vec4 specular = vec4(light.specular * spec, 1.0f) * texture(material.texture_specular1,TexCoords);
 
    float theta = dot(lightDir, normalize(-s_light.direction));
    float epsilon = s_light.cutOff - s_light.outerCutOff;
@@ -139,8 +146,8 @@ vec4 testSpotLight()
 
     if(theta > s_light.outerCutOff)
     {
-        vec3 result = ambient + diffuse + specular;
-        return  vec4(result,1.0);
+        vec4 result = ambient + diffuse + specular;
+        return  result;
     }
 
     return vec4(0);

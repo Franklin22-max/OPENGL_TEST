@@ -160,6 +160,7 @@
     <ClInclude Include="Dependencies\glad\include\KHR\khrplatform.h" />
     <ClInclude Include="include\BufferOBJ.h" />
     <ClInclude Include="include\Camera.h" />
+    <ClInclude Include="include\StringTools.h" />
     <ClInclude Include="include\Light.h" />
     <ClInclude Include="include\Material.h" />
     <ClInclude Include="include\Model.h" />
@@ -169,6 +170,14 @@
     <ClInclude Include="include\Transformation.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="vendor\stb_image\stb_image.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\assimp\assimp\bin\Release\assimp-vc143-mt.dll" />
+    <None Include=".gitignore" />
+    <None Include="include\shader\lightingFragmentShader.vert" />
+    <None Include="include\shader\lightingVertexShader.vert" />
+    <None Include="include\shader\meshFragmentShader.frag" />
+    <None Include="include\shader\meshVertexShader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

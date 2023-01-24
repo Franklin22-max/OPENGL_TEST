@@ -11,8 +11,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
-namespace be
-{
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
@@ -25,7 +23,7 @@ enum Camera_Movement {
 // Default camera values
 const GLfloat YAW        = -90.0f;
 const GLfloat PITCH      =  0.0f;
-const GLfloat SPEED      =  8.0f;
+const GLfloat SPEED      =  50.0f;
 const GLfloat SENSITIVTY =  0.05f;
 const GLfloat ZOOM       =  45.0f;
 
@@ -136,6 +134,6 @@ private:
         this->Up    = glm::normalize(glm::cross(this->Right, this->Front));
     }
 };
-}
+
 
 #endif // CAMERA_H_INCLUDED

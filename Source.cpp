@@ -12,10 +12,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
 
 
 #include "Shader.h"
@@ -25,6 +21,8 @@
 #include "Material.h"
 #include "Light.h"
 #include "Texture.h"
+#include "Model.h"
+
 #include "vendor/stb_image/stb_image.h"
 
 #define PI 3.1415926535897932384626433832795
@@ -38,10 +36,7 @@ GLfloat lastY = 300;
 GLfloat lastX = 400;
 
 //CAMERA
-be::Camera camera;
-
-be::Green_Plastic plastic;
-be::Brass brass;
+Camera camera;
 
 GLboolean firstMouse = true;
 
@@ -52,7 +47,12 @@ bool keys[1024];
 
 
 glm::vec3 objectColor = glm::vec3(1.0f, 0.5f, 0.31f);
-be::Light myLight = be::Light({ 1.2f,1.0f,4.0f });
+
+
+PointLight p_light = PointLight(glm::vec3(0.0f, 80.0f, 40.0f ));
+SpotLight s_light = SpotLight();
+DirectonLight d_light;
+
 
 glm::mat4 identity = {
 {1.0f, 0.0f, 0.0f , 0.0f},
@@ -63,76 +63,19 @@ glm::mat4 identity = {
 
 
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
-{
-    // When a user presses the escape key, we set the WindowShouldClose
-    // closing the application
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GL_TRUE);
-
-    keys[key] = action;
-}
 
 
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-    if (keys[GLFW_KEY_SPACE] == GLFW_PRESS)
-    {
-        if (firstMouse)
-        {
-            lastX = xpos;
-            lastY = ypos;
-            firstMouse = false;
-        }
-        GLfloat xoffset = xpos - lastX;
-        GLfloat yoffset = lastY - ypos;
-        camera.ProcessMouseMovement(xoffset, yoffset);
-    }
-    else
-        firstMouse = true;
-}
+void doMovement();
+void doRotation();
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
-void doRotation()
-{
-    if (keys[GLFW_KEY_UP] == GLFW_PRESS)
-        camera.ProcessMouseMovement(0,500 * deltaTime, false);
-    if (keys[GLFW_KEY_DOWN] == GLFW_PRESS)
-        camera.ProcessMouseMovement(0,-500 * deltaTime, false);
-    if (keys[GLFW_KEY_LEFT] == GLFW_PRESS)
-        camera.ProcessMouseMovement(-500 * deltaTime,0, false);
-    if (keys[GLFW_KEY_RIGHT] == GLFW_PRESS)
-        camera.ProcessMouseMovement(500 * deltaTime,0, false);
-}
-
-
-void doMovement()
-{
-    if (keys[GLFW_KEY_W] == GLFW_PRESS)
-        camera.ProcessKeyboard(be::FORWARD, deltaTime);
-    if (keys[GLFW_KEY_S] == GLFW_PRESS)
-        camera.ProcessKeyboard(be::BACKWARD, deltaTime);
-    if (keys[GLFW_KEY_A] == GLFW_PRESS)
-        camera.ProcessKeyboard(be::LEFT, deltaTime);
-    if (keys[GLFW_KEY_D] == GLFW_PRESS)
-        camera.ProcessKeyboard(be::RIGHT, deltaTime);
-}
-
-
-
-
-
-using HRC_time_point = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
 
 
 
 int main(int args, char** argv)
 {
-
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile("./", aiProcess_Triangulate |
-        aiProcess_FlipUVs);
-
     GLuint indices[] = { // Note that we start from 0!
     0, 1, 3, // First Triangle
     3, 2, 1 // Second Triangle
@@ -208,6 +151,8 @@ int main(int args, char** argv)
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwMakeContextCurrent(window);
 
+    glfwSwapInterval(1);
+
     if (!gladLoadGL())
         return -1;
 
@@ -215,69 +160,76 @@ int main(int args, char** argv)
 
     glViewport(0, 0, 800, 600);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_STENCIL_TEST);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_FRAMEBUFFER_SRGB);
+
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
 
-    // TEXTURE
-    be::Texture contaner2(R"(utility\images\container2.png)");
-    be::Texture contaner2grey(R"(utility\images\container2blackWhite.png)");
 
-    contaner2.Bind(0);
-    contaner2grey.Bind(1);
 
 
 
 
     // READ , COMPILE AND LINK SHADER
-    be::Shader cubeShader("vertex_shader.vert", "fragment_shader.vert");
-    be::bufferObject vbo;
-    be::vertexArray va;
-    va.Bind();
-    vbo.bufferData(sizeof(vertices), vertices, GL_STATIC_DRAW);
-    va.vertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-    va.vertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    va.vertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+   
+    Shader lampShader("include/shader/lightingVertexShader.vert", "include/shader/lightingFragmentShader.vert");
+    vertexArray lva;
 
-
-
-    be::Shader lampShader("lightingVertexShader.vert", "lightingFragmentShader.vert");
-    be::vertexArray lva;
+    bufferObject vbo;
+    vbo.bufferData(8 * 6 * sizeof(float), vertices, GL_STATIC_DRAW);
     lva.Bind();
     lva.vertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+    
+    //Model LivingRoom(R"(C:\Users\FRANKLIN\Documents\My 3D Models\living_room\InteriorTest.obj)");
+    //Model LadyCat(R"(C:\Users/FRANKLIN/Documents/My 3D Models/LadyCat\LadyCat.obj)");
+    Model Tree(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Tree\Tree.obj)");
+    Model Seahawk(R"(C:\Users\FRANKLIN\Documents\My 3D Models\SeaHawk\SeaHawk.obj)");
 
- 
+    Shader objectShader("include/shader/meshVertexShader.vert", "include/shader/meshFragmentShader.frag");
+    objectShader.Use();
+    Shader::linkUnform3f(objectShader, "viewPos", &camera.Position);
+
+
+    // Directional light
+    Shader::linkUnform3f(objectShader, "d_light.direction", &d_light.direction);
+    Shader::linkUnform3f(objectShader, "d_light.ambient", &d_light.ambient);
+    Shader::linkUnform3f(objectShader, "d_light.diffuse", &d_light.diffuse);
+    Shader::linkUnform3f(objectShader, "d_light.specular", &d_light.specular);
+
+
+    // point light
+    Shader::linkUnform3f(objectShader, "p_light.ambient", &p_light.ambient);
+    Shader::linkUnform3f(objectShader, "p_light.diffuse", &p_light.diffuse);
+    Shader::linkUnform3f(objectShader, "p_light.specular", &p_light.specular);
+    Shader::linkUnform3f(objectShader, "p_light.position", &p_light.position);
+    Shader::linkUnform1f(objectShader, "p_light.constant", p_light.constant);
+    Shader::linkUnform1f(objectShader, "p_light.linear", p_light.linear);
+    Shader::linkUnform1f(objectShader, "p_light.quadratic", p_light.quadratic);
+
+    // spot light
+    Shader::linkUnform3f(objectShader, "s_light.ambient", &s_light.ambient);
+    Shader::linkUnform3f(objectShader, "s_light.diffuse", &s_light.diffuse);
+    Shader::linkUnform3f(objectShader, "s_light.specular", &s_light.specular);
+    Shader::linkUnform3f(objectShader, "s_light.position", &s_light.position);
 
 
     glm::mat4 view = identity;
+    
+    // projection matrix
+    glm::mat4 projection = identity;
+    projection = glm::perspective(glm::radians(45.0f), (GLfloat)(screenWidth / screenHeight), 0.1f, 600.0f);
 
 
-    cubeShader.Use();
-    be::Shader::linkUnform3f(cubeShader, "viewPos", &camera.Position);
-    be::Shader::LinkMaterial(cubeShader, &brass);
 
-    // general light
-    be::Shader::linkUnform3f(cubeShader, "light.ambient", &myLight.ambient);
-    be::Shader::linkUnform3f(cubeShader, "light.diffuse", &myLight.diffuse);
-    be::Shader::linkUnform3f(cubeShader, "light.specular", &myLight.specular);
-    be::Shader::linkUnform3f(cubeShader, "light.position", &myLight.position);
-
-    // point light
-    be::Shader::linkUnform1f(cubeShader, "p_light.constant", 1.0f);
-    be::Shader::linkUnform1f(cubeShader, "p_light.linear", 0.045f);
-    be::Shader::linkUnform1f(cubeShader, "p_light.quadratic", 0.0075);
+    camera.Position = { 1.0f, 10.f, 30.f };
 
     
-
-    // material
-    be::Shader::linkUnform1i(cubeShader, "material.specular", 1);
-    be::Shader::linkUnform1f(cubeShader, "material.shininess",32.0f);
-
-
-    std::vector<glm::vec3> cubePos;
-
-    for (int i = 0; i < 10; i++)
-        cubePos.push_back({ -2 * (rand() % 5) + 5, -2 * (rand() % 5) + 5, -2*i - (rand() % 15) });
-
+    float elapseTime = 0;
     // Program loop
     while (!glfwWindowShouldClose(window))
     {
@@ -286,25 +238,27 @@ int main(int args, char** argv)
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        if (deltaTime < 1/frameRate)
+        std::stringstream ss;
+        ss << "FPS = " << 1.f / deltaTime;
+        elapseTime += deltaTime;
+
+        if (elapseTime > 0.3f)
         {
-            std::this_thread::sleep_for(std::chrono::duration<std::chrono::seconds::rep, std::chrono::seconds::period>(std::chrono::seconds::rep(1 / frameRate - deltaTime)));
+            glfwSetWindowTitle(window, ss.str().c_str());
+            elapseTime = 0.0f;
         }
+        
 
         // Check and call events
         glfwPollEvents();
 
         // clear
-        be::Renderer::Clear();
+        Renderer::Clear();
 
         doMovement();
         doRotation();
 
-
         
-        // projection matrix
-        glm::mat4 projection = identity;
-        projection = glm::perspective(glm::radians(45.0f), (GLfloat)(screenWidth / screenHeight), 0.1f, 100.0f);
         // view matrix
         view = camera.GetViewMatrix();
 
@@ -312,42 +266,74 @@ int main(int args, char** argv)
         lampShader.Use();
         // lamp positin and translation
         glm::mat4 _model = identity;
-        _model = glm::translate(_model, myLight.position);
+        _model = glm::translate(_model, p_light.position);
         _model = glm::scale(_model, glm::vec3(0.2f));
         // link with model uniform
-        be::Shader::linkUnform3f(lampShader, "lightColor", &myLight.diffuse);
-        be::Shader::linkUnformMatrix4fv(lampShader, "model", glm::value_ptr(_model));
-        be::Shader::linkUnformMatrix4fv(lampShader, "view", glm::value_ptr(view), 1, GL_FALSE);
-        be::Shader::linkUnformMatrix4fv(lampShader, "projection", glm::value_ptr(projection), 1, GL_FALSE);
+        Shader::linkUnform3f(lampShader, "lightColor", &p_light.diffuse);
+        Shader::linkUnformMatrix4fv(lampShader, "model", glm::value_ptr(_model));
+        Shader::linkUnformMatrix4fv(lampShader, "view", glm::value_ptr(view), 1, GL_FALSE);
+        Shader::linkUnformMatrix4fv(lampShader, "projection", glm::value_ptr(projection), 1, GL_FALSE);
         // draw objects
-        be::Renderer::DrawArray(lva, lampShader, 36);
+        Renderer::DrawArray(lva, lampShader, 36);
 
 
-
-        cubeShader.Use();
+        
+        objectShader.Use();
         glm::vec4 scale = { 1.0f, 1.0f, 1.0f, 1.0f };
-        be::Shader::linkUnformMatrix4fv(cubeShader, "view", glm::value_ptr(view), 1, GL_FALSE);
-        be::Shader::linkUnformMatrix4fv(cubeShader, "projection", glm::value_ptr(projection), 1, GL_FALSE);
+        Shader::linkUnformMatrix4fv(objectShader, "view", glm::value_ptr(view), 1, GL_FALSE);
+        Shader::linkUnformMatrix4fv(objectShader, "projection", glm::value_ptr(projection), 1, GL_FALSE);
 
         
         // spotlight
-        be::Shader::linkUnform3f(cubeShader, "s_light.position", &camera.Position);
-        be::Shader::linkUnform3f(cubeShader, "s_light.direction", &camera.Front);
-        be::Shader::linkUnform1f(cubeShader, "s_light.cutOff", glm::cos(glm::radians(5.f)));
-        be::Shader::linkUnform1f(cubeShader, "s_light.outerCutOff", glm::cos(glm::radians(15.f)));
-
-        for (int i = 0; i < 10; i++)
-        {
-            glm::mat4 model = identity;
-            model = glm::translate(model, cubePos[i]);
-            model = glm::scale(model, glm::vec3(scale.x, scale.y, scale.z));
-            model = glm::rotate(model, glm::radians((float)(glfwGetTime() * 2.0f * PI * 10)), glm::vec3(scale.x, scale.y, scale.z));
+        Shader::linkUnform3f(objectShader, "s_light.position", &camera.Position);
+        Shader::linkUnform3f(objectShader, "s_light.direction", &camera.Front);
+        Shader::linkUnform1f(objectShader, "s_light.cutOff", s_light.cutOff);
+        Shader::linkUnform1f(objectShader, "s_light.outerCutOff", s_light.outerCutOff);
+        
+        
+   
+        glm::mat4 model = identity;
+        
             
-            // link with model uniform
-            be::Shader::linkUnformMatrix4fv(cubeShader, "model", glm::value_ptr(model));
 
-            be::Renderer::DrawArray(va, cubeShader, 36);
-        }
+        
+        model = glm::translate(model, { 5.f,0.f,-250.f });
+        //model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+        model = glm::rotate(model, glm::radians((float)(glfwGetTime() * 2.0f * PI * 5)), glm::vec3(0.0f, 1.f, 0.f));
+        // link with model uniform
+        Shader::linkUnformMatrix4fv(objectShader, "model", glm::value_ptr(model));
+        Seahawk.Draw(objectShader);
+
+
+        // link with model uniform
+        model = identity;
+        model = glm::translate(model, { -23.f,0.f,-150.f });
+        model = glm::scale(model, glm::vec3(12, 12, 12));
+        // model = glm::rotate(model, glm::radians((float)(glfwGetTime() * 2.0f * PI * 10)), glm::vec3(0.0f, 1.f, 0.f));
+        Shader::linkUnformMatrix4fv(objectShader, "model", glm::value_ptr(model));
+        Tree.Draw(objectShader);
+
+
+        model = identity;
+        model = glm::translate(model, { 5.f,0.f,-48.f });
+        //model = glm::scale(model, glm::vec3(scale.x, scale.y, scale.z));
+        //model = glm::rotate(model, glm::radians((float)(glfwGetTime() * 2.0f * PI * 10)), glm::vec3(0.0f, 1.f, 0.f));
+
+        // link with model uniform
+        Shader::linkUnformMatrix4fv(objectShader, "model", glm::value_ptr(model));
+        //LadyCat.Draw(objectShader);
+
+
+
+        model = identity;
+        model = glm::translate(model, { 5.f,0.f,-45.f });
+        model = glm::scale(model, glm::vec3(8, 8, 8));
+        //model = glm::rotate(model, glm::radians((float)(glfwGetTime() * 2.0f * PI * 10)), glm::vec3(0.0f, 1.f, 0.f));
+        // link with model uniform
+        Shader::linkUnformMatrix4fv(objectShader, "model", glm::value_ptr(model));
+        //LivingRoom.Draw(objectShader);
+
+
         
 
         // Swap the buffers
@@ -356,4 +342,61 @@ int main(int args, char** argv)
 
     glfwTerminate();
     return 0;
+}
+
+
+
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
+{
+    // When a user presses the escape key, we set the WindowShouldClose
+    // closing the application
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GL_TRUE);
+
+    keys[key] = action;
+}
+
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if (keys[GLFW_KEY_SPACE] == GLFW_PRESS)
+    {
+        if (firstMouse)
+        {
+            lastX = xpos;
+            lastY = ypos;
+            firstMouse = false;
+        }
+        GLfloat xoffset = xpos - lastX;
+        GLfloat yoffset = lastY - ypos;
+        camera.ProcessMouseMovement(xoffset, yoffset);
+    }
+    else
+        firstMouse = true;
+}
+
+void doRotation()
+{
+    if (keys[GLFW_KEY_UP] == GLFW_PRESS)
+        camera.ProcessMouseMovement(0, 500 * deltaTime, false);
+    if (keys[GLFW_KEY_DOWN] == GLFW_PRESS)
+        camera.ProcessMouseMovement(0, -500 * deltaTime, false);
+    if (keys[GLFW_KEY_LEFT] == GLFW_PRESS)
+        camera.ProcessMouseMovement(-500 * deltaTime, 0, false);
+    if (keys[GLFW_KEY_RIGHT] == GLFW_PRESS)
+        camera.ProcessMouseMovement(500 * deltaTime, 0, false);
+}
+
+
+void doMovement()
+{
+    if (keys[GLFW_KEY_W] == GLFW_PRESS)
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    if (keys[GLFW_KEY_S] == GLFW_PRESS)
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if (keys[GLFW_KEY_A] == GLFW_PRESS)
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    if (keys[GLFW_KEY_D] == GLFW_PRESS)
+        camera.ProcessKeyboard(RIGHT, deltaTime);
 }

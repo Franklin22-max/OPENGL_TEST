@@ -4,8 +4,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-namespace be
-{
 
 struct bufferObject
 {
@@ -91,8 +89,6 @@ struct indexBuffer
         glDrawElements(GL_TRIANGLES,count,GL_FLOAT,indices);
     }
 };
-
-}
 
 
 #endif // __INDEX_BUFFER_H_INCLUDED
