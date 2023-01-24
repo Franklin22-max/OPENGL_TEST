@@ -11,16 +11,15 @@ C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\M
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(141,1): warning C4305: '=': truncation from 'double' to 'float'
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(152,1): warning C4305: '=': truncation from 'double' to 'float'
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\StringTools.h(14,42): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\StringTools.h(33,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Texture.h(34,44): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Model.h(120,30): warning C4244: 'argument': conversion from 'GLuint' to 'GLfloat', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Model.h(135,1): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Model.h(227,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Model.h(256,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\StringTools.h(29,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Texture.h(35,61): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Model.h(121,30): warning C4244: 'argument': conversion from 'GLuint' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Model.h(136,1): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Model.h(235,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Model.h(264,22): warning C4018: '<': signed/unsigned mismatch
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(237,30): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(367,21): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(368,21): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(371,25): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(372,25): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   OPENGL_TUTORIAL.vcxproj -> C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\x64\Debug\OPENGL_TUTORIAL.exe

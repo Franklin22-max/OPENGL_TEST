@@ -25,39 +25,39 @@ inline GLuint TextureFromFile(std::string name, std::string directory)
     if (!image)
     {
         using recursive_directory_iterator = std::filesystem::recursive_directory_iterator;
-        std::filesystem::path p(name);
-        p.make_preferred();
 
+        std::filesystem::path p(name);
+  
+        p.make_preferred();
         name = to_string(p);
         name = strip_edge(name, '"');
 
-        int index = name.find_last_of("\\");
+        int index = name.find_last_of(p.preferred_separator);
 
         if (index == name.npos)
             index = 0;
 
         std::string new_name = name.substr(index + 1, name.length() - index);
 
+        
+        std::string preferred;
+        preferred = p.preferred_separator;
+        
         for (const auto& dirEntry : recursive_directory_iterator(directory))
         {
             
             std::string hold = to_string(dirEntry);
-
             hold = strip_edge(hold, '"');
-            hold = replace_all_in(hold, R"(\\)", R"(\)");
 
             if (hold.find(new_name) != name.npos)
             {
-
                 image = stbi_load(hold.c_str(), &width, &height, &BPP, 4);
-                std::cout << hold << std::endl;
-                if(!image)
-                    std::cout << "Couldnt load texture" + directory + "\n";
                 break;
             }
-
         }
 
+        if (!image)
+            std::cout << "Couldnt load texture" + directory + "\n";
        
     }
         

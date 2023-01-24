@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <filesystem>
+#include <exception>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -193,9 +194,16 @@ private:
 				return;
 			}
 
-			this->directory = path.substr(0, path.find_last_of('\\'));
+			
+			
+			std::filesystem::path p(path);
+			p.make_preferred();
+			path = to_string(p);
+			path = strip_edge(path, '"');
+			
+			
+			this->directory = path.substr(0, path.find_last_of(p.preferred_separator));
 
-			std::cout << directory << "\n";
 			this->processNode(scene->mRootNode, scene);
 		}
 
