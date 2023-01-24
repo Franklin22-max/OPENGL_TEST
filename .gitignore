@@ -6,6 +6,10 @@
 *.ipch
 *.opendb
 *.opensdf
+*.exe.recipe
+*.log
+*ipdb
+*.pdb
 
 .Dependencies/assimp/
 .x64/Debug/assimp-vc143-mt.dll
