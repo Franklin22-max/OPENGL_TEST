@@ -5,6 +5,9 @@
 #include <sstream>
 #include <filesystem>
 #include <exception>
+#include <functional>
+#include <algorithm>
+#include <stdint.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -45,8 +48,19 @@ struct Vertex{
 	glm::vec2 TexCoords;
 };
 
+enum class MODEL_TYPE : uint8_t
+{
+	WORLD_OBJECT = 0,
+	LUMINUS_OBJECT,
+};
 
 struct Mesh {
+
+
+private:
+	/* Render data */
+	GLuint VAO, VBO, EBO;
+	/* Functions */
 
 public:
 	/* Mesh Data */
@@ -55,7 +69,7 @@ public:
 	std::vector<Texture> textures;
 	Material material;
 
-
+public:
 	Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture> textures, Material mat)
 	{
 		this->vertices = vertices;
@@ -73,120 +87,103 @@ public:
 		glGenBuffers(1, &this->EBO);
 		glBindVertexArray(this->VAO);
 
-		glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-		glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex),
-			&this->vertices[0], GL_STATIC_DRAW);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(
-			GLuint),
-			&this->indices[0], GL_STATIC_DRAW);
+		GLCall(glBindBuffer(GL_ARRAY_BUFFER, this->VBO));
+		GLCall(glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex), &this->vertices[0], GL_STATIC_DRAW));
+		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO));
+		GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(GLuint), &this->indices[0], GL_STATIC_DRAW));
 		// Vertex Positions
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),(GLvoid*)0);
+		GLCall(glEnableVertexAttribArray(0));
+		GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),(GLvoid*)0));
 		// Vertex Normals
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),(GLvoid*)offsetof(Vertex, Normal));
+		GLCall(glEnableVertexAttribArray(1));
+		GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),(GLvoid*)offsetof(Vertex, Normal)));
 		// Vertex Texture Coords
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),(GLvoid*)offsetof(Vertex, TexCoords));
-		glBindVertexArray(0);
+		GLCall(glEnableVertexAttribArray(2));
+		GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),(GLvoid*)offsetof(Vertex, TexCoords)));
 
-		
+		glBindVertexArray(0);
 	}
 
 
 
 
-	void Draw(Shader shader)
+	virtual void Draw(Shader& shader)
 	{
-		GLuint diffuseNr = 1;
-		GLuint specularNr = 1;
-		for (GLuint i = 0; i < this->textures.size(); i++)
-		{
-			glActiveTexture(GL_TEXTURE0 + i); // Activate proper texture unitbefore binding
-				// Retrieve texture number (the N in diffuse_textureN)
-			std::stringstream ss;
-			std::string number;
-			std::string name = this->textures[i].type;
-			if (name == "texture_diffuse")
-				ss << diffuseNr++; // Transfer GLuint to stream
-			else if (name == "texture_specular")
-				ss << specularNr++; // Transfer GLuint to stream
-			number = ss.str();
-
-			
-
-			
-			glUniform1f(glGetUniformLocation(shader.Program(), ("material." +
-				name + number).c_str()), i);
-			glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
-		}
-		glActiveTexture(GL_TEXTURE0);
-
-		// bind material color if any
-		glUniform1i(glGetUniformLocation(shader.Program(), "material.numTextures"), int(textures.size()));
-		glUniform4f(glGetUniformLocation(shader.Program(), "material.ambient"), material.ambient.r, material.ambient.g, material.ambient.b, material.ambient.a);
-		glUniform4f(glGetUniformLocation(shader.Program(), "material.diffuse"), material.diffuse.r, material.diffuse.g, material.diffuse.b, material.diffuse.a);
-		glUniform4f(glGetUniformLocation(shader.Program(), "material.specular"), material.specular.r, material.specular.g, material.specular.b, material.specular.a);
-		glUniform1f(glGetUniformLocation(shader.Program(), "material.shininess"), material.shininess);
-
-		
+		//std::cout << int(textures.size()) << " , " << material.diffuse.r << " , " << material.diffuse.g << " , " << material.diffuse.b << std::endl;
 		// Draw mesh
 		glBindVertexArray(this->VAO);
-		glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
+		GLCall(glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0));
 		glBindVertexArray(0);
 
 		// set everything back to defaults once configured.
 		for (GLuint i = 0; i < this->textures.size(); i++)
 		{
-			glActiveTexture(GL_TEXTURE0 + i);
-			glBindTexture(GL_TEXTURE_2D, 0);
+			GLCall(glActiveTexture(GL_TEXTURE0 + i));
+			GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 		}
 	}
 
-
-
-
-private:
-	/* Render data */
-	GLuint VAO, VBO, EBO;
-	/* Functions */
 };
 
+
+// 
 
 
 
 class Model
 {
+
+private:
+	/* Model Data */
+	std::vector<Texture> textures_loaded;
+	std::vector<Mesh> meshes;
+	std::string directory;
+	MODEL_TYPE type;
+	bool invertNormal;
+
 public:
+	// model matrix for this model
+	Shader& shader;
+	glm::mat4 model;
 
 	/* Functions */
-	Model(std::string path)
+	Model(std::string path , Shader& shader, MODEL_TYPE type, bool invertNormal = false)
+	: shader(shader), type(type), invertNormal(invertNormal)
 	{
+		model = glm::identity<glm::mat4>();
 		this->loadModel(path.c_str());
+	}
+
+	
+
+	virtual GLuint textureLoader(std::string name ,std::string directory)
+	{
+		return TextureFromFile(name, directory);
 	}
 	
 
-	void Draw(Shader shader)
+	virtual void Draw()
 	{
+		
+		shader.Use();
+		Shader::linkUnformMatrix4fv(shader, "model", glm::value_ptr(model), 1, GL_FALSE);
+
 		for (GLuint i = 0; i < this->meshes.size(); i++)
+		{
+			shader.BindShaderProperties(meshes[i]);
 			this->meshes[i].Draw(shader);
+		}
+			
 	}
-
-
-private:
-		/* Model Data */
-		std::vector<Texture> textures_loaded;
-		std::vector<Mesh> meshes;
-		std::string directory;
 
 
 		/* Functions */
 		void loadModel(std::string path)
 		{
 			Assimp::Importer import;
-			const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate |
-				aiProcess_FlipUVs | aiProcess_GenNormals);
+			const aiScene* scene;
+			scene = (invertNormal)? import.ReadFile(path, aiProcess_Triangulate |aiProcess_FlipUVs) 
+									: import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
 			if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->
 				mRootNode)
 			{
@@ -243,6 +240,7 @@ private:
 				vert.Normal.y = mesh->mNormals[i].y;
 				vert.Normal.z = mesh->mNormals[i].z;
 
+				
 				if (mesh->mTextureCoords[0]) // Does the mesh contain texture coordinates?
 				{
 					vert.TexCoords.x = mesh->mTextureCoords[0][i].x;
@@ -253,11 +251,7 @@ private:
 					vert.TexCoords.x = 0.0f;
 					vert.TexCoords.y = 0.0f;
 				}
-					
-
-
 				vertices.push_back(vert);
-				
 			}
 
 
@@ -323,7 +317,7 @@ private:
 				if (!skip)
 				{ // If texture hasn’t been loaded already, load it
 					Texture texture;
-					texture.id = TextureFromFile(str.C_Str(), this->directory);
+					texture.id = textureLoader(str.C_Str(), this->directory);
 					texture.type = typeName;
 					texture.path = str;
 					textures.push_back(texture);

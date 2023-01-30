@@ -22,6 +22,8 @@
 #include "Light.h"
 #include "Texture.h"
 #include "Model.h"
+#include "Skybox.h"
+#include "ShaderBindFunctions.h"
 
 #include "vendor/stb_image/stb_image.h"
 
@@ -35,8 +37,10 @@ GLfloat frameRate = 60.0f; // Time of last frame
 GLfloat lastY = 300;
 GLfloat lastX = 400;
 
+float elapseTime = 0;
+
 //CAMERA
-Camera camera;
+Camera camera = Camera({ 20,200,500 });
 
 GLboolean firstMouse = true;
 
@@ -54,13 +58,6 @@ SpotLight s_light = SpotLight();
 DirectonLight d_light;
 
 
-glm::mat4 identity = {
-{1.0f, 0.0f, 0.0f , 0.0f},
-{0.0f, 1.0f, 0.0f, 0.0f},
-{0.0f, 0.0f,1.0f, 0.0f},
-{0.0f, 0.0f, 0.0f, 1.0f}
-};
-
 
 
 
@@ -69,6 +66,7 @@ void doMovement();
 void doRotation();
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 
 
@@ -76,56 +74,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 int main(int args, char** argv)
 {
-    GLuint indices[] = { // Note that we start from 0!
-    0, 1, 3, // First Triangle
-    3, 2, 1 // Second Triangle
-    };
-
-    float vertices[] = {
-        // positions          // normals           // texture coords
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
-    };
-
     if (!glfwInit())
     {
         std::cerr << "couldn't initialize glfw\n";
@@ -149,6 +97,7 @@ int main(int args, char** argv)
 
     glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
     glfwMakeContextCurrent(window);
 
     glfwSwapInterval(1);
@@ -169,67 +118,94 @@ int main(int args, char** argv)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
+    // rotate camera
+    camera.Rotate(-200, -300);
 
 
+    // Skybox
+    Shader skyboxShader("include/shader/skyboxVertexShader.vert", "include/shader/skyboxFragmentShader.frag");
+    Skybox starnight(R"(C:\Users\FRANKLIN\Documents\My 3D Models\sky_box\star_night)", {"right.png","left.png","top.png", "bottom.png", "front.png","back.png"});
 
 
+    // Models
+    Shader modelShader("include/shader/modelVertexShader.vert", "include/shader/modelFragmentShader.frag", WorldObjectBindFunc);
 
+    Model seaHawk(R"(C:\Users\FRANKLIN\Documents\My 3D Models\SeaHawk\SeaHawk.obj)", modelShader, MODEL_TYPE::WORLD_OBJECT);
+    seaHawk.model = glm::translate(seaHawk.model, { -300.f,1.f,-50 });
 
-    // READ , COMPILE AND LINK SHADER
-   
-    Shader lampShader("include/shader/lightingVertexShader.vert", "include/shader/lightingFragmentShader.vert");
-    vertexArray lva;
+    Model livingRoom(R"(C:\Users\FRANKLIN\Documents\My 3D Models\living_room\InteriorTest.obj)", modelShader, MODEL_TYPE::WORLD_OBJECT);
+    livingRoom.model = glm::translate(livingRoom.model, { 0.f,0.f,-50 });
+    livingRoom.model = glm::scale(livingRoom.model, { 20.f,20.f,20 });
 
-    bufferObject vbo;
-    vbo.bufferData(8 * 6 * sizeof(float), vertices, GL_STATIC_DRAW);
-    lva.Bind();
-    lva.vertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+    Model tree(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Tree\Tree.obj)", modelShader, MODEL_TYPE::WORLD_OBJECT, true);
+    tree.model = glm::translate(tree.model, {-50.f,0.f,50});
+    tree.model = glm::scale(tree.model, { 20,20,20 });
+
+    /*Model house(R"(C:\Users\FRANKLIN\Documents\My 3D Models\house\house.obj)", modelShader, MODEL_TYPE::WORLD_OBJECT);
+    house.model = glm::translate(house.model, { -100.f,0.f,-50 });
+    house.model = glm::scale(house.model, { 0.2,0.2,0.2 });*/
+
+    Model plane(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Plane\Plane.obj)", modelShader, MODEL_TYPE::WORLD_OBJECT);
+    plane.model = glm::translate(plane.model, { 0.f,-1.f,-200 });
+    plane.model = glm::translate(plane.model, { 0.f,-1.f,-200 });
+    plane.model = glm::scale(plane.model, { 500,500,500 });
+
+    plane.model = glm::rotate(plane.model,glm::radians(90.f), { 0.f, 1.f, 0.f });
     
-    //Model LivingRoom(R"(C:\Users\FRANKLIN\Documents\My 3D Models\living_room\InteriorTest.obj)");
-    //Model LadyCat(R"(C:\Users/FRANKLIN/Documents/My 3D Models/LadyCat\LadyCat.obj)");
-    Model Tree(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Tree\Tree.obj)");
-    Model Seahawk(R"(C:\Users\FRANKLIN\Documents\My 3D Models\SeaHawk\SeaHawk.obj)");
 
-    Shader objectShader("include/shader/meshVertexShader.vert", "include/shader/meshFragmentShader.frag");
-    objectShader.Use();
-    Shader::linkUnform3f(objectShader, "viewPos", &camera.Position);
+    std::cout << plane.model[0][0] << " , " << plane.model[0][1] << " , " << plane.model[0][2] << " , " << plane.model[0][3] << std::endl;
+    std::cout << plane.model[1][0] << " , " << plane.model[1][1] << " , " << plane.model[1][2] << " , " << plane.model[1][3] << std::endl;
+    std::cout << plane.model[2][0] << " , " << plane.model[2][1] << " , " << plane.model[2][2] << " , " << plane.model[2][3] << std::endl;
+    std::cout << plane.model[3][0] <<" , " << plane.model[3][1] << " , " << plane.model[3][2]<<" , "<< plane.model[3][3] << std::endl;
 
 
-    // Directional light
-    Shader::linkUnform3f(objectShader, "d_light.direction", &d_light.direction);
-    Shader::linkUnform3f(objectShader, "d_light.ambient", &d_light.ambient);
-    Shader::linkUnform3f(objectShader, "d_light.diffuse", &d_light.diffuse);
-    Shader::linkUnform3f(objectShader, "d_light.specular", &d_light.specular);
-
-
-    // point light
-    Shader::linkUnform3f(objectShader, "p_light.ambient", &p_light.ambient);
-    Shader::linkUnform3f(objectShader, "p_light.diffuse", &p_light.diffuse);
-    Shader::linkUnform3f(objectShader, "p_light.specular", &p_light.specular);
-    Shader::linkUnform3f(objectShader, "p_light.position", &p_light.position);
-    Shader::linkUnform1f(objectShader, "p_light.constant", p_light.constant);
-    Shader::linkUnform1f(objectShader, "p_light.linear", p_light.linear);
-    Shader::linkUnform1f(objectShader, "p_light.quadratic", p_light.quadratic);
-
-    // spot light
-    Shader::linkUnform3f(objectShader, "s_light.ambient", &s_light.ambient);
-    Shader::linkUnform3f(objectShader, "s_light.diffuse", &s_light.diffuse);
-    Shader::linkUnform3f(objectShader, "s_light.specular", &s_light.specular);
-    Shader::linkUnform3f(objectShader, "s_light.position", &s_light.position);
-
-
-    glm::mat4 view = identity;
+    Renderer::models.push_back(&tree);
+    Renderer::models.push_back(&plane);
+    Renderer::models.push_back(&seaHawk);
+    Renderer::models.push_back(&livingRoom);
+    //Renderer::models.push_back(&house);
     
+    
+
+
+    // light
+    DirectonLight d_light;
+    PointLight p_light({80,200, 200},1.0f);
+
+
+    //Renderer::d_lights.push_back(&d_light);
+    Renderer::p_lights.push_back(&p_light);
+
+    Shader lightShader("include/shader/lightingVertexShader.vert", "include/shader/lightingFragmentShader.frag");
+    Model lightSquare(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Sphere\Sphere.obj)", lightShader, MODEL_TYPE::LUMINUS_OBJECT);
+    lightSquare.model = glm::translate(lightSquare.model, p_light.position);
+    lightSquare.model = glm::scale(lightSquare.model, {10,10,10});
+
+
+    lightShader.Use();
+    Shader::linkUnform3f(lightShader, "lightColor",  &p_light.diffuse);
+    Renderer::models.push_back(&lightSquare);
+
+    // view matrix
+    glm::mat4 view = glm::identity<glm::mat4>();
     // projection matrix
-    glm::mat4 projection = identity;
-    projection = glm::perspective(glm::radians(45.0f), (GLfloat)(screenWidth / screenHeight), 0.1f, 600.0f);
+    glm::mat4 projection = glm::identity<glm::mat4>();
+
+
+    modelShader.Use();
+    Shader::linkDirectionalLight(modelShader, std::string("d_light1"), d_light);
+    Shader::linkPointlLight(modelShader, std::string("p_light1"), p_light);
+    //Shader::linkSpotLight(modelShader, std::string("s_light1"), s_light);
+
+    Renderer::camera = &camera;
 
 
 
-    camera.Position = { 1.0f, 10.f, 30.f };
+    UniformBuffer uniformB(0, "Matrices", 2 * sizeof(glm::mat4));
 
-    
-    float elapseTime = 0;
+    uniformB.linkShader(modelShader.Program());
+    uniformB.linkShader(lightShader.Program());
+
     // Program loop
     while (!glfwWindowShouldClose(window))
     {
@@ -237,104 +213,44 @@ int main(int args, char** argv)
         GLfloat currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-
-        std::stringstream ss;
-        ss << "FPS = " << 1.f / deltaTime;
         elapseTime += deltaTime;
+
+
 
         if (elapseTime > 0.3f)
         {
-            glfwSetWindowTitle(window, ss.str().c_str());
+            glfwSetWindowTitle(window, to_string(1.f / deltaTime).c_str());
             elapseTime = 0.0f;
         }
         
-
         // Check and call events
         glfwPollEvents();
 
-        // clear
-        Renderer::Clear();
 
         doMovement();
         doRotation();
 
-        
-        // view matrix
+        // clear
+        Renderer::Clear();
+
         view = camera.GetViewMatrix();
+        projection = glm::perspective(glm::radians(camera.Zoom), (GLfloat)(screenWidth / screenHeight), 0.1f, 2000.0f);
 
-
-        lampShader.Use();
         // lamp positin and translation
-        glm::mat4 _model = identity;
-        _model = glm::translate(_model, p_light.position);
-        _model = glm::scale(_model, glm::vec3(0.2f));
-        // link with model uniform
-        Shader::linkUnform3f(lampShader, "lightColor", &p_light.diffuse);
-        Shader::linkUnformMatrix4fv(lampShader, "model", glm::value_ptr(_model));
-        Shader::linkUnformMatrix4fv(lampShader, "view", glm::value_ptr(view), 1, GL_FALSE);
-        Shader::linkUnformMatrix4fv(lampShader, "projection", glm::value_ptr(projection), 1, GL_FALSE);
+        glm::mat4 _view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
+
+        skyboxShader.Use();
+        Shader::linkUnformMatrix4fv(skyboxShader, "view", glm::value_ptr(_view), 1, GL_FALSE);
+        Shader::linkUnformMatrix4fv(skyboxShader, "projection", glm::value_ptr(projection), 1, GL_FALSE);
         // draw objects
-        Renderer::DrawArray(lva, lampShader, 36);
+        starnight.Draw(skyboxShader);
 
+        // insert data to my uniform buffer
+        uniformB.Subdata(0, sizeof(glm::mat4), glm::value_ptr(projection));
+        uniformB.Subdata(sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
 
-        
-        objectShader.Use();
-        glm::vec4 scale = { 1.0f, 1.0f, 1.0f, 1.0f };
-        Shader::linkUnformMatrix4fv(objectShader, "view", glm::value_ptr(view), 1, GL_FALSE);
-        Shader::linkUnformMatrix4fv(objectShader, "projection", glm::value_ptr(projection), 1, GL_FALSE);
-
-        
-        // spotlight
-        Shader::linkUnform3f(objectShader, "s_light.position", &camera.Position);
-        Shader::linkUnform3f(objectShader, "s_light.direction", &camera.Front);
-        Shader::linkUnform1f(objectShader, "s_light.cutOff", s_light.cutOff);
-        Shader::linkUnform1f(objectShader, "s_light.outerCutOff", s_light.outerCutOff);
-        
-        
-   
-        glm::mat4 model = identity;
-        
-            
-
-        
-        model = glm::translate(model, { 5.f,0.f,-250.f });
-        //model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
-        model = glm::rotate(model, glm::radians((float)(glfwGetTime() * 2.0f * PI * 5)), glm::vec3(0.0f, 1.f, 0.f));
-        // link with model uniform
-        Shader::linkUnformMatrix4fv(objectShader, "model", glm::value_ptr(model));
-        Seahawk.Draw(objectShader);
-
-
-        // link with model uniform
-        model = identity;
-        model = glm::translate(model, { -23.f,0.f,-150.f });
-        model = glm::scale(model, glm::vec3(12, 12, 12));
-        // model = glm::rotate(model, glm::radians((float)(glfwGetTime() * 2.0f * PI * 10)), glm::vec3(0.0f, 1.f, 0.f));
-        Shader::linkUnformMatrix4fv(objectShader, "model", glm::value_ptr(model));
-        Tree.Draw(objectShader);
-
-
-        model = identity;
-        model = glm::translate(model, { 5.f,0.f,-48.f });
-        //model = glm::scale(model, glm::vec3(scale.x, scale.y, scale.z));
-        //model = glm::rotate(model, glm::radians((float)(glfwGetTime() * 2.0f * PI * 10)), glm::vec3(0.0f, 1.f, 0.f));
-
-        // link with model uniform
-        Shader::linkUnformMatrix4fv(objectShader, "model", glm::value_ptr(model));
-        //LadyCat.Draw(objectShader);
-
-
-
-        model = identity;
-        model = glm::translate(model, { 5.f,0.f,-45.f });
-        model = glm::scale(model, glm::vec3(8, 8, 8));
-        //model = glm::rotate(model, glm::radians((float)(glfwGetTime() * 2.0f * PI * 10)), glm::vec3(0.0f, 1.f, 0.f));
-        // link with model uniform
-        Shader::linkUnformMatrix4fv(objectShader, "model", glm::value_ptr(model));
-        //LivingRoom.Draw(objectShader);
-
-
-        
+        //Draw Models
+        Renderer::DrawModels(camera.Position);
 
         // Swap the buffers
         glfwSwapBuffers(window);
@@ -357,6 +273,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     keys[key] = action;
 }
 
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera.ZoomDisplay(yoffset);
+}
+
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
@@ -370,7 +291,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
         }
         GLfloat xoffset = xpos - lastX;
         GLfloat yoffset = lastY - ypos;
-        camera.ProcessMouseMovement(xoffset, yoffset);
+        camera.Rotate(xoffset, yoffset);
     }
     else
         firstMouse = true;
@@ -379,24 +300,24 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 void doRotation()
 {
     if (keys[GLFW_KEY_UP] == GLFW_PRESS)
-        camera.ProcessMouseMovement(0, 500 * deltaTime, false);
+        camera.Rotate(0, 500 * deltaTime);
     if (keys[GLFW_KEY_DOWN] == GLFW_PRESS)
-        camera.ProcessMouseMovement(0, -500 * deltaTime, false);
+        camera.Rotate(0, -500 * deltaTime);
     if (keys[GLFW_KEY_LEFT] == GLFW_PRESS)
-        camera.ProcessMouseMovement(-500 * deltaTime, 0, false);
+        camera.Rotate(-500 * deltaTime, 0);
     if (keys[GLFW_KEY_RIGHT] == GLFW_PRESS)
-        camera.ProcessMouseMovement(500 * deltaTime, 0, false);
+        camera.Rotate(500 * deltaTime, 0);
 }
 
 
 void doMovement()
 {
     if (keys[GLFW_KEY_W] == GLFW_PRESS)
-        camera.ProcessKeyboard(FORWARD, deltaTime);
+        camera.Move(FORWARD, deltaTime);
     if (keys[GLFW_KEY_S] == GLFW_PRESS)
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
+        camera.Move(BACKWARD, deltaTime);
     if (keys[GLFW_KEY_A] == GLFW_PRESS)
-        camera.ProcessKeyboard(LEFT, deltaTime);
+        camera.Move(LEFT, deltaTime);
     if (keys[GLFW_KEY_D] == GLFW_PRESS)
-        camera.ProcessKeyboard(RIGHT, deltaTime);
+        camera.Move(RIGHT, deltaTime);
 }

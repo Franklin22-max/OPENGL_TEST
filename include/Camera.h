@@ -73,7 +73,7 @@ public:
     }
 
     // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-    void ProcessKeyboard(Camera_Movement direction, GLfloat deltaTime)
+    void Move(Camera_Movement direction, GLfloat deltaTime)
     {
         GLfloat velocity = this->MovementSpeed * deltaTime;
         if (direction == FORWARD)
@@ -87,7 +87,7 @@ public:
     }
 
     // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-    void ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset, GLboolean constrainPitch = true)
+    void Rotate(GLfloat xoffset, GLfloat yoffset, GLboolean constrainPitch = true)
     {
         xoffset *= this->MouseSensitivity;
         yoffset *= this->MouseSensitivity;
@@ -109,7 +109,7 @@ public:
     }
 
     // Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
-    void ProcessMouseScroll(GLfloat yoffset)
+    void ZoomDisplay(GLfloat yoffset)
     {
         if (this->Zoom >= 1.0f && this->Zoom <= 45.0f)
             this->Zoom -= yoffset;

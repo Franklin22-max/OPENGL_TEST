@@ -9,6 +9,36 @@
 #include "StringTools.h"
 
 
+struct TexturParameters
+{
+    TexturParameters(GLenum pname, GLint param)
+    : pname(pname), param(param){}
+    GLenum pname;
+    GLint param;
+};
+
+
+inline GLuint GenTexture(GLsizei width, GLsizei height, GLint BMP = 0, unsigned char* image = NULL, std::vector<TexturParameters> Texparams = { TexturParameters(GL_TEXTURE_WRAP_S, GL_REPEAT )})
+{
+    GLuint texture;
+
+    glGenTextures(1, &texture);
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, BMP, GL_RGBA, GL_UNSIGNED_BYTE, image);
+
+ 
+    for(int i=0; i < Texparams.size(); i++)
+        glTexParameteri(GL_TEXTURE_2D, Texparams[i].pname, Texparams[i].param);
+
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    return texture;
+}
+
+
 
 inline GLuint TextureFromFile(std::string name, std::string directory)
 {
@@ -57,18 +87,12 @@ inline GLuint TextureFromFile(std::string name, std::string directory)
         }
 
         if (!image)
-            std::cout << "Couldnt load texture" + directory + "\n";
+            std::cout << "Couldnt load texture  [ " + name + " ]" + "\n";
        
     }
         
 
-    glGenTextures(1, &texture);
-
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    texture = GenTexture(width, height, 0, image);
 
     if (image)
         stbi_image_free(image);
