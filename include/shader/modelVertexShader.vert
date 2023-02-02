@@ -11,6 +11,19 @@ layout (std140) uniform Matrices
     mat4 view;
 };
 
+
+out VS_OUT {
+    vec3 FragPos;
+    vec3 Normal;
+    vec2 TexCoords;
+    vec4 FragPosLightSpace;
+} vs_out;
+
+
+uniform mat4 lightMV;
+out mat4 LightMV;
+
+
 out vec2 TexCoords;
 uniform mat4 model;
 
@@ -22,8 +35,10 @@ void main()
 {
 
     gl_Position = projection * view * model * vec4(position,1.0f);
-    FragPos = vec3(model * vec4(position, 1.0f));// get fragment position in world space
-    Normal = mat3(transpose(inverse(model))) * normal;
-    TexCoords = vec2(texCoord.x, 1.0f - texCoord.y);
+
+    vs_out.FragPos = vec3(model * vec4(position, 1.0f));// get fragment position in world space
+    vs_out.Normal = mat3(transpose(inverse(model))) * normal;
+    vs_out.TexCoords = vec2(texCoord.x, 1.0f - texCoord.y);
+    vs_out.FragPosLightSpace =  LightMV * vec4(position,1.0f);
 
 }

@@ -1,12 +1,14 @@
 #ifndef TEXTURE_H_INCLUDED
 #define TEXTURE_H_INCLUDED
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "Common.h"
 #include <string>
 #include "../vendor/stb_image/stb_image.h"
 #include <filesystem>
 #include "StringTools.h"
+
+
+
 
 
 struct TexturParameters
@@ -18,7 +20,7 @@ struct TexturParameters
 };
 
 
-inline GLuint GenTexture(GLsizei width, GLsizei height, GLint BMP = 0, unsigned char* image = NULL, std::vector<TexturParameters> Texparams = { TexturParameters(GL_TEXTURE_WRAP_S, GL_REPEAT )})
+inline GLuint GenColorTexture(GLsizei width, GLsizei height, GLint BMP = 0, unsigned char* image = NULL, std::vector<TexturParameters> Texparams = { TexturParameters(GL_TEXTURE_WRAP_S, GL_REPEAT )})
 {
     GLuint texture;
 
@@ -30,6 +32,28 @@ inline GLuint GenTexture(GLsizei width, GLsizei height, GLint BMP = 0, unsigned 
 
  
     for(int i=0; i < Texparams.size(); i++)
+        glTexParameteri(GL_TEXTURE_2D, Texparams[i].pname, Texparams[i].param);
+
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    return texture;
+}
+
+
+
+inline GLuint GenDepthTexture(GLsizei width, GLsizei height, GLint BMP = 0, unsigned char* image = NULL, std::vector<TexturParameters> Texparams = { TexturParameters(GL_TEXTURE_WRAP_S, GL_REPEAT) })
+{
+    GLuint texture;
+
+    glGenTextures(1, &texture);
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, BMP, GL_DEPTH_COMPONENT, GL_FLOAT, image);
+
+
+    for (int i = 0; i < Texparams.size(); i++)
         glTexParameteri(GL_TEXTURE_2D, Texparams[i].pname, Texparams[i].param);
 
     glGenerateMipmap(GL_TEXTURE_2D);
@@ -92,7 +116,7 @@ inline GLuint TextureFromFile(std::string name, std::string directory)
     }
         
 
-    texture = GenTexture(width, height, 0, image);
+    texture = GenColorTexture(width, height, 0, image);
 
     if (image)
         stbi_image_free(image);

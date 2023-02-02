@@ -1,6 +1,3 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 #include <math.h>
 #include <chrono>
 #include <thread>
@@ -14,6 +11,7 @@
 
 
 
+#include "include/Common.h"
 #include "Shader.h"
 #include "Renderer.h"
 #include "BufferOBJ.h"
@@ -23,7 +21,7 @@
 #include "Texture.h"
 #include "Model.h"
 #include "Skybox.h"
-#include "ShaderBindFunctions.h"
+#include "CustomShaders.h"
 
 #include "vendor/stb_image/stb_image.h"
 
@@ -74,6 +72,25 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 int main(int args, char** argv)
 {
+
+    GLfloat quad_vertices[] = {
+        // position         texcord
+       -1.0f, -1.0f, 0.0f,    0.0f, 0.0f,// bottom left
+        1.0f, -1.0f, 0.0f,    1.0f, 0.0f,// bottom right
+        1.0f,  1.0f, 0.0f,    1.0f, 1.0f,// top right
+       -1.0f,  1.0f, 0.0f,    0.0f, 1.0f,// top left
+    };
+
+
+    GLuint quad_indices[6] = {
+        0,1,3,
+        1,2,3
+    };
+
+
+
+
+
     if (!glfwInit())
     {
         std::cerr << "couldn't initialize glfw\n";
@@ -103,15 +120,19 @@ int main(int args, char** argv)
     glfwSwapInterval(1);
 
     if (!gladLoadGL())
+    {
+        std::cout << "Failed to initialize glad" << std::endl;
         return -1;
+    }
+
 
     std::cout << glGetString(GL_VERSION);
 
-    glViewport(0, 0, 800, 600);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_STENCIL_TEST);
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_FRAMEBUFFER_SRGB);
+    glViewport(0, 0, screenWidth, screenHeight);
+    //glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_STENCIL_TEST);
+    //glEnable(GL_CULL_FACE);
+    //glEnable(GL_FRAMEBUFFER_SRGB);
 
 
     glEnable(GL_BLEND);
@@ -121,31 +142,32 @@ int main(int args, char** argv)
     // rotate camera
     camera.Rotate(-200, -300);
 
+    // initialize Renderer, Do before calling any member
+    Renderer::Init(&camera);
+
 
     // Skybox
-    Shader skyboxShader("include/shader/skyboxVertexShader.vert", "include/shader/skyboxFragmentShader.frag");
     Skybox starnight(R"(C:\Users\FRANKLIN\Documents\My 3D Models\sky_box\star_night)", {"right.png","left.png","top.png", "bottom.png", "front.png","back.png"});
 
 
+
+
     // Models
-    Shader modelShader("include/shader/modelVertexShader.vert", "include/shader/modelFragmentShader.frag", WorldObjectBindFunc);
+    Shader& object_shader = *Renderer::shaders[SHADER_TYPE::OBJ_SHADER];
 
-    Model seaHawk(R"(C:\Users\FRANKLIN\Documents\My 3D Models\SeaHawk\SeaHawk.obj)", modelShader, MODEL_TYPE::WORLD_OBJECT);
-    seaHawk.model = glm::translate(seaHawk.model, { -300.f,1.f,-50 });
+    Model seaHawk(R"(C:\Users\FRANKLIN\Documents\My 3D Models\SeaHawk\SeaHawk.obj)", object_shader, MODEL_TYPE::WORLD_OBJECT);
+    seaHawk.model = glm::translate(seaHawk.model, { -200.f,1.f,-50 });
 
-    Model livingRoom(R"(C:\Users\FRANKLIN\Documents\My 3D Models\living_room\InteriorTest.obj)", modelShader, MODEL_TYPE::WORLD_OBJECT);
+    Model livingRoom(R"(C:\Users\FRANKLIN\Documents\My 3D Models\living_room\InteriorTest.obj)", object_shader, MODEL_TYPE::WORLD_OBJECT);
     livingRoom.model = glm::translate(livingRoom.model, { 0.f,0.f,-50 });
-    livingRoom.model = glm::scale(livingRoom.model, { 20.f,20.f,20 });
+    livingRoom.model = glm::scale(livingRoom.model, { 20.f,20.f,20.f });
 
-    Model tree(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Tree\Tree.obj)", modelShader, MODEL_TYPE::WORLD_OBJECT, true);
+    Model tree(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Tree\Tree.obj)", object_shader, MODEL_TYPE::WORLD_OBJECT);
     tree.model = glm::translate(tree.model, {-50.f,0.f,50});
     tree.model = glm::scale(tree.model, { 20,20,20 });
 
-    /*Model house(R"(C:\Users\FRANKLIN\Documents\My 3D Models\house\house.obj)", modelShader, MODEL_TYPE::WORLD_OBJECT);
-    house.model = glm::translate(house.model, { -100.f,0.f,-50 });
-    house.model = glm::scale(house.model, { 0.2,0.2,0.2 });*/
 
-    Model plane(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Plane\Plane.obj)", modelShader, MODEL_TYPE::WORLD_OBJECT);
+    Model plane(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Plane\Plane.obj)", object_shader, MODEL_TYPE::WORLD_OBJECT);
     plane.model = glm::translate(plane.model, { 0.f,-1.f,-200 });
     plane.model = glm::translate(plane.model, { 0.f,-1.f,-200 });
     plane.model = glm::scale(plane.model, { 500,500,500 });
@@ -153,37 +175,34 @@ int main(int args, char** argv)
     plane.model = glm::rotate(plane.model,glm::radians(90.f), { 0.f, 1.f, 0.f });
     
 
-    std::cout << plane.model[0][0] << " , " << plane.model[0][1] << " , " << plane.model[0][2] << " , " << plane.model[0][3] << std::endl;
-    std::cout << plane.model[1][0] << " , " << plane.model[1][1] << " , " << plane.model[1][2] << " , " << plane.model[1][3] << std::endl;
-    std::cout << plane.model[2][0] << " , " << plane.model[2][1] << " , " << plane.model[2][2] << " , " << plane.model[2][3] << std::endl;
-    std::cout << plane.model[3][0] <<" , " << plane.model[3][1] << " , " << plane.model[3][2]<<" , "<< plane.model[3][3] << std::endl;
-
-
     Renderer::models.push_back(&tree);
     Renderer::models.push_back(&plane);
     Renderer::models.push_back(&seaHawk);
     Renderer::models.push_back(&livingRoom);
-    //Renderer::models.push_back(&house);
-    
-    
 
-
+    
     // light
     DirectonLight d_light;
-    PointLight p_light({80,200, 200},1.0f);
+    PointLight p_light({ 80,200, 200 }, 1.0f);
+    SpotLight s_light({0.f, 450.f, 0.f});
 
-
-    //Renderer::d_lights.push_back(&d_light);
+    Renderer::d_lights.push_back(&d_light);
+    Renderer::s_lights.push_back(&s_light);
     Renderer::p_lights.push_back(&p_light);
+    
 
-    Shader lightShader("include/shader/lightingVertexShader.vert", "include/shader/lightingFragmentShader.frag");
-    Model lightSquare(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Sphere\Sphere.obj)", lightShader, MODEL_TYPE::LUMINUS_OBJECT);
+    object_shader.Use();
+    Shader::linkDirectionalLight(object_shader, std::string("d_light1"), d_light);
+    Shader::linkPointlLight(object_shader, std::string("p_light1"), p_light);
+    Shader::linkSpotLight(object_shader, std::string("s_light1"), s_light);
+
+    Model lightSquare(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Sphere\Sphere.obj)", *Renderer::shaders[SHADER_TYPE::LIGHT_SHADER], MODEL_TYPE::LUMINUS_OBJECT);
     lightSquare.model = glm::translate(lightSquare.model, p_light.position);
     lightSquare.model = glm::scale(lightSquare.model, {10,10,10});
 
 
-    lightShader.Use();
-    Shader::linkUnform3f(lightShader, "lightColor",  &p_light.diffuse);
+    Renderer::shaders[SHADER_TYPE::LIGHT_SHADER]->Use();
+    Shader::linkUnform3f(*Renderer::shaders[SHADER_TYPE::LIGHT_SHADER], "lightColor",  &p_light.diffuse);
     Renderer::models.push_back(&lightSquare);
 
     // view matrix
@@ -192,24 +211,38 @@ int main(int args, char** argv)
     glm::mat4 projection = glm::identity<glm::mat4>();
 
 
-    modelShader.Use();
-    Shader::linkDirectionalLight(modelShader, std::string("d_light1"), d_light);
-    Shader::linkPointlLight(modelShader, std::string("p_light1"), p_light);
-    //Shader::linkSpotLight(modelShader, std::string("s_light1"), s_light);
-
-    Renderer::camera = &camera;
-
-
-
+    
     UniformBuffer uniformB(0, "Matrices", 2 * sizeof(glm::mat4));
+    uniformB.linkShader(object_shader.Program());
+    uniformB.linkShader(Renderer::shaders[SHADER_TYPE::LIGHT_SHADER]->Program());
 
-    uniformB.linkShader(modelShader.Program());
-    uniformB.linkShader(lightShader.Program());
 
+
+    GLuint VAO = 0, VBO = 0, IBO = 0;
+
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &IBO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER,sizeof(quad_vertices), quad_vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quad_indices), quad_indices, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    glBindBuffer(GL_VERTEX_ARRAY, 0);
+    glBindVertexArray(0);
+    
     // Program loop
     while (!glfwWindowShouldClose(window))
     {
-
         GLfloat currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -239,18 +272,27 @@ int main(int args, char** argv)
         // lamp positin and translation
         glm::mat4 _view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
 
-        skyboxShader.Use();
-        Shader::linkUnformMatrix4fv(skyboxShader, "view", glm::value_ptr(_view), 1, GL_FALSE);
-        Shader::linkUnformMatrix4fv(skyboxShader, "projection", glm::value_ptr(projection), 1, GL_FALSE);
+        Renderer::shaders[SHADER_TYPE::SKYBOX_SHADER]->Use();
+        Shader::linkUnformMatrix4fv(*Renderer::shaders[SHADER_TYPE::SKYBOX_SHADER], "view", glm::value_ptr(_view), 1, GL_FALSE);
+        Shader::linkUnformMatrix4fv(*Renderer::shaders[SHADER_TYPE::SKYBOX_SHADER], "projection", glm::value_ptr(projection), 1, GL_FALSE);
         // draw objects
-        starnight.Draw(skyboxShader);
+        starnight.Draw(*Renderer::shaders[SHADER_TYPE::SKYBOX_SHADER]);
+
 
         // insert data to my uniform buffer
         uniformB.Subdata(0, sizeof(glm::mat4), glm::value_ptr(projection));
         uniformB.Subdata(sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
 
         //Draw Models
-        Renderer::DrawModels(camera.Position);
+        Renderer::DrawModels();
+
+        Renderer::shaders[SHADER_TYPE::BASIC_SHADER]->Use();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, Renderer::depthTexture);
+
+        glBindVertexArray(VAO);
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
+        glBindVertexArray(0);
 
         // Swap the buffers
         glfwSwapBuffers(window);

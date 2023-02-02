@@ -71,16 +71,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)include;$(SolutionDir)Dependencies\glfw\include;$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\assimp\include;</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)include;$(SolutionDir)Dependencies\glfw\include;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\glad\include;</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)include;$(SolutionDir)Dependencies\glfw\include;$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\assimp\include;</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)include;$(SolutionDir)Dependencies\glfw\include;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\glad\include;</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)include;$(SolutionDir)Dependencies\glfw\include;$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\assimp\include;</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)include;$(SolutionDir)Dependencies\glfw\include;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\glad\include;</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)include;$(SolutionDir)Dependencies\glfw\include;$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\assimp\include;</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)include;$(SolutionDir)Dependencies\glfw\include;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\glad\include;</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -163,13 +163,12 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Dependencies\glad\include\glad\glad.h" />
-    <ClInclude Include="Dependencies\glad\include\KHR\khrplatform.h" />
     <ClInclude Include="include\BufferOBJ.h" />
     <ClInclude Include="include\Camera.h" />
     <ClInclude Include="include\Common.h" />
-    <ClInclude Include="include\FrameBuffer.h" />
-    <ClInclude Include="include\ShaderBindFunctions.h" />
+    <ClInclude Include="include\PostProcessing.h" />
+    <ClInclude Include="include\CustomShaders.h" />
+    <ClInclude Include="include\shader\shadowDepthVertexShader.vert" />
     <ClInclude Include="include\Skybox.h" />
     <ClInclude Include="include\StringTools.h" />
     <ClInclude Include="include\Light.h" />
@@ -194,11 +193,15 @@
   <ItemGroup>
     <None Include="..\assimp\assimp\bin\Release\assimp-vc143-mt.dll" />
     <None Include=".gitignore" />
+    <None Include="include\shader\basicFragmentShader.frag" />
+    <None Include="include\shader\bloomFragmentShader.frag" />
+    <None Include="include\shader\bloomVertexShader.vert" />
     <None Include="include\shader\kernel.frag" />
     <None Include="include\shader\lightingFragmentShader.frag" />
-    <None Include="include\shader\lightingVertexShader.vert" />
+    <None Include="include\shader\basicVertexShader.vert" />
     <None Include="include\shader\modelFragmentShader.frag" />
     <None Include="include\shader\modelVertexShader.vert" />
+    <None Include="include\shader\shadowDepthFragShader.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

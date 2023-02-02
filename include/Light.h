@@ -1,7 +1,7 @@
 #ifndef LIGHT_H_INCLUDED
 #define LIGHT_H_INCLUDED
 
-#include <glad/glad.h>
+#include "Common.h"
 #include <glm/glm.hpp>
 
     
@@ -82,10 +82,9 @@ struct PointLight : Light
 struct SpotLight : Light
 {
     glm::vec3 position;
-
+    glm::vec3 direction;
     float cutOff;
     float outerCutOff;
-    glm::vec3 direction;
 
     SpotLight(glm::vec3 position, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float cutOff = glm::cos(glm::radians(5.f)), float outerCutOff = glm::cos(glm::radians(25.f)))
         : position(position), cutOff(cutOff), outerCutOff(outerCutOff)
@@ -100,7 +99,7 @@ struct SpotLight : Light
     {
         cutOff = glm::cos(glm::radians(5.f));
         outerCutOff = glm::cos(glm::radians(25.f));
-
+        direction = glm::vec3(0.0f, -1.f, 0.0);
         ambient = glm::vec3(0.3f, 0.3f, 0.3f);
         diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
         specular = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -111,7 +110,7 @@ struct SpotLight : Light
     {
         this->cutOff = cutOff;
         this->outerCutOff = outerCutOff;
-
+        direction = glm::vec3(0.0f, -1.f, 0.0);
         ambient = glm::vec3(0.3f, 0.3f, 0.3f);
         diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
         specular = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -121,7 +120,7 @@ struct SpotLight : Light
     {
         cutOff = glm::cos(glm::radians(5.f));
         outerCutOff = glm::cos(glm::radians(25.f));
-
+        direction = glm::vec3(0.0f, -1.f, 0.0);
         position = glm::vec3(0, 0, 0);
         ambient = glm::vec3(0.3f, 0.3f, 0.3f);
         diffuse = glm::vec3(1.0f, 1.0f, 1.0f);

@@ -7,8 +7,8 @@
 #include <sstream>
 #include <iostream>
 #include <unordered_map>
+#include <map>
 
-#include <glad/glad.h> // Include glew to get all the required OpenGL  headers
 #include "Light.h"
 #include "Common.h"
 
@@ -19,29 +19,35 @@ class Mesh;
 
 class Shader
 {
-    // helps ease up and localise shader bind properties to the shader, making it easy for models to switch shaders and still bind correctly
-    using ShaderBindFunc = void(*)(Shader* shader, Mesh& mesh);
+    friend class Renderer;
 
     // The program ID
     GLuint _Program;
-    std::unordered_map<std::string, GLint> m_UniformLocationCache;
-    ShaderBindFunc BindFunc;// help bind shader properties in mesh
+    std::map<std::string, GLint> m_UniformLocationCache;
+
 public:
+
+
+    // helps ease up and localise shader bind properties to the shader, making it easy for models to switch shaders and still bind correctly
+    virtual void BindShaderProperties(Mesh& mesh)
+    {
+
+    }
+
+
+
     GLuint Program()
     {
         return this->_Program;
     }
 
-    // helps ease up and localise shader bind properties to the shader, making it easy for models to switch shaders and still bind correctly
-    void BindShaderProperties(Mesh& mesh)
-    {
-        if (BindFunc)
-            BindFunc(this, mesh);
-    }
+public:
 
+    Shader() = default;
+protected:
+    
     // Constructor reads and builds the shader
-    Shader(const GLchar* vertexPath, const GLchar* fragmentPath, ShaderBindFunc BindFunc = NULL)
-    :  BindFunc(BindFunc)
+    Shader(const GLchar* vertexPath, const GLchar* fragmentPath)
     {
         // 1. Retrieve the vertex/fragment source code from filePath
         std::string vertexCode;
@@ -69,7 +75,7 @@ public:
         }
         catch(std::ifstream::failure e)
         {
-            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << "\n In " << vertexPath << "\n In " << fragmentPath << std::endl;
         }
         const GLchar* vShaderCode = vertexCode.c_str();
         const GLchar* fShaderCode = fragmentCode.c_str();
@@ -87,7 +93,7 @@ public:
         if(!success)
         {
             GLCall(glGetShaderInfoLog(vertex, 512, NULL, infoLog));
-            std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog<< std::endl;
+            std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog<<"\n In "<< vertexPath << std::endl;
         };
 
         // fragment Shader
@@ -99,7 +105,7 @@ public:
         if(!success)
         {
             GLCall(glGetShaderInfoLog(fragment, 512, NULL, infoLog));
-            std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog<< std::endl;
+            std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << "\n In " << fragmentPath << std::endl;
         };
 
         // Shader Program
@@ -117,21 +123,23 @@ public:
         // Delete the shaders as they’re linked into our program now and no longer necessery
         GLCall(glDeleteShader(vertex));
         GLCall(glDeleteShader(fragment));
-    };
 
+    };
+public:
 
     GLint GetUniformLocation(const std::string& name)
     {
 
-        //if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
-            //return m_UniformLocationCache[name];
+        
+        if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
+            return m_UniformLocationCache[name];
 
-        GLCall(int location = glGetUniformLocation(Program(), name.c_str()));
+        int location = glGetUniformLocation(Program(), name.c_str());
 
-        //if (location == -1)
-            //std::cout << "Warning Uniform " + name + " Does not Exists" << std::endl;
+        if (location == -1)
+            std::cout << "Warning Uniform " + name + " Does not Exists" << std::endl;
             
-        //m_UniformLocationCache[name] = location;
+        m_UniformLocationCache[name] = location;
     
         return location;
 

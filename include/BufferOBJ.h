@@ -1,8 +1,6 @@
 #ifndef __INDEX_BUFFER_H_INCLUDED
 #define __INDEX_BUFFER_H_INCLUDED
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include "Common.h"
 
 
@@ -33,6 +31,11 @@ struct bufferObject
     {
         GLCall(glBindBuffer(target, 0));
     }
+
+	void Delete()
+	{
+		glDeleteBuffers(1, &VBO);
+	}
 };
 
 
@@ -61,6 +64,11 @@ public:
     {
         GLCall(glBindVertexArray(0));
     }
+
+	void Delete()
+	{
+		glDeleteBuffers(1, &VAO);
+	}
 };
 
 struct indexBuffer
@@ -68,6 +76,7 @@ struct indexBuffer
     GLuint EBO = 0;
     GLfloat* indices;
 
+	indexBuffer() = default;
     indexBuffer(GLfloat* indices, GLenum usage)
     :indices(indices)
     {
@@ -90,6 +99,11 @@ struct indexBuffer
     {
         GLCall(glDrawElements(GL_TRIANGLES,count,GL_FLOAT,indices));
     }
+
+	void Delete()
+	{
+		glDeleteBuffers(1, &EBO);
+	}
 };
 
 
@@ -99,15 +113,12 @@ class RenderBuffer
 {
 public:
 	GLuint rbo;
-	RenderBuffer()
+	RenderBuffer(GLshort width, GLsizei height)
 	{
 		glGenRenderbuffers(1, &rbo);
-	}
-
-
-	void  CreateDepthStencileBuffer(GLshort width, GLsizei height)
-	{
+		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	}
 
 	void Bind()
@@ -118,6 +129,11 @@ public:
 	void unBind()
 	{
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	}
+
+	void Delete()
+	{
+		glDeleteRenderbuffers(1,&rbo);
 	}
 };
 
@@ -158,25 +174,27 @@ public:
 	}
 
 
-	void BindAttachements(GLuint textureID, GLuint rbo)
+	void BindAttachements(GLuint textureID, GLuint rbo , GLenum Textureattachment = GL_COLOR_ATTACHMENT0, GLenum RBattachment = GL_DEPTH_STENCIL_ATTACHMENT)
 	{
 		Bind();
 		glBindTexture(GL_TEXTURE_2D, textureID);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, Textureattachment, GL_TEXTURE_2D, textureID, 0);
 
 		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, RBattachment, GL_RENDERBUFFER, rbo);
 
-		ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			std::cout << "FrameBuffer Incomplete" << std::endl;
 		unBind();
 	}
 
-	void AttachTexture(GLuint textureID)
+	void AttachTexture(GLuint textureID, GLenum attachment  = GL_COLOR_ATTACHMENT0)
 	{
 		Bind();
 		glBindTexture(GL_TEXTURE_2D, textureID);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
-		ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, attachment , GL_TEXTURE_2D, textureID, 0);
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			std::cout << "FrameBuffer Incomplete" << std::endl;
 		unBind();
 	}
 
@@ -185,7 +203,8 @@ public:
 		Bind();
 		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-		ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			std::cout << "FrameBuffer Incomplete" << std::endl;
 		unBind();
 	}
 

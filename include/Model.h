@@ -19,34 +19,12 @@
 
 #include "Texture.h"
 
-#include <glad/glad.h>
-
 #include "Shader.h"
 
 
 
 
-struct Texture {
-	GLuint id;
-	std::string type;
-	aiString path;
-};
 
-struct Material
-{
-	glm::vec4 ambient;
-	glm::vec4 diffuse;
-	glm::vec4 specular;
-	float shininess;
-	Material() = default;
-};
-
-
-struct Vertex{
-	glm::vec3 Position;
-	glm::vec3 Normal;
-	glm::vec2 TexCoords;
-};
 
 enum class MODEL_TYPE : uint8_t
 {
@@ -54,7 +32,31 @@ enum class MODEL_TYPE : uint8_t
 	LUMINUS_OBJECT,
 };
 
+
+
 struct Mesh {
+
+	struct Texture {
+		GLuint id;
+		std::string type;
+		aiString path;
+	};
+
+	struct Material
+	{
+		glm::vec4 ambient;
+		glm::vec4 diffuse;
+		glm::vec4 specular;
+		float shininess;
+		Material() = default;
+	};
+
+
+	struct Vertex {
+		glm::vec3 Position;
+		glm::vec3 Normal;
+		glm::vec2 TexCoords;
+	};
 
 
 private:
@@ -64,13 +66,13 @@ private:
 
 public:
 	/* Mesh Data */
-	std::vector<Vertex> vertices;
+	std::vector<Mesh::Vertex> vertices;
 	std::vector<GLuint> indices;
-	std::vector<Texture> textures;
+	std::vector<Mesh::Texture> textures;
 	Material material;
 
 public:
-	Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture> textures, Material mat)
+	Mesh(std::vector<Mesh::Vertex> vertices, std::vector<GLuint> indices, std::vector<Mesh::Texture> textures, Mesh::Material mat)
 	{
 		this->vertices = vertices;
 		this->indices = indices;
@@ -88,18 +90,18 @@ public:
 		glBindVertexArray(this->VAO);
 
 		GLCall(glBindBuffer(GL_ARRAY_BUFFER, this->VBO));
-		GLCall(glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex), &this->vertices[0], GL_STATIC_DRAW));
+		GLCall(glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Mesh::Vertex), &this->vertices[0], GL_STATIC_DRAW));
 		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO));
 		GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(GLuint), &this->indices[0], GL_STATIC_DRAW));
-		// Vertex Positions
+		// Mesh::Vertex Positions
 		GLCall(glEnableVertexAttribArray(0));
-		GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),(GLvoid*)0));
-		// Vertex Normals
+		GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex),(GLvoid*)0));
+		// Mesh::Vertex Normals
 		GLCall(glEnableVertexAttribArray(1));
-		GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),(GLvoid*)offsetof(Vertex, Normal)));
-		// Vertex Texture Coords
+		GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex),(GLvoid*)offsetof(Mesh::Vertex, Normal)));
+		// Mesh::Vertex Mesh::Texture Coords
 		GLCall(glEnableVertexAttribArray(2));
-		GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),(GLvoid*)offsetof(Vertex, TexCoords)));
+		GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex),(GLvoid*)offsetof(Mesh::Vertex, TexCoords)));
 
 		glBindVertexArray(0);
 	}
@@ -107,9 +109,8 @@ public:
 
 
 
-	virtual void Draw(Shader& shader)
+	virtual void Draw()
 	{
-		//std::cout << int(textures.size()) << " , " << material.diffuse.r << " , " << material.diffuse.g << " , " << material.diffuse.b << std::endl;
 		// Draw mesh
 		glBindVertexArray(this->VAO);
 		GLCall(glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0));
@@ -135,7 +136,7 @@ class Model
 
 private:
 	/* Model Data */
-	std::vector<Texture> textures_loaded;
+	std::vector<Mesh::Texture> textures_loaded;
 	std::vector<Mesh> meshes;
 	std::string directory;
 	MODEL_TYPE type;
@@ -162,16 +163,16 @@ public:
 	}
 	
 
-	virtual void Draw()
+	virtual void Draw(Shader* shader = nullptr)
 	{
-		
-		shader.Use();
-		Shader::linkUnformMatrix4fv(shader, "model", glm::value_ptr(model), 1, GL_FALSE);
+		Shader* nShader = (shader != nullptr) ? shader : &this->shader;
+		nShader->Use();
+		Shader::linkUnformMatrix4fv(*nShader, "model", glm::value_ptr(model), 1, GL_FALSE);
 
 		for (GLuint i = 0; i < this->meshes.size(); i++)
 		{
-			shader.BindShaderProperties(meshes[i]);
-			this->meshes[i].Draw(shader);
+			nShader->BindShaderProperties(meshes[i]);
+			this->meshes[i].Draw();
 		}
 			
 	}
@@ -224,14 +225,14 @@ public:
 
 		Mesh processMesh(aiMesh* mesh, const aiScene* scene)
 		{
-			std::vector<Vertex> vertices; 
+			std::vector<Mesh::Vertex> vertices; 
 			std::vector<GLuint> indices;
-			std::vector<Texture> textures;
-			Material mat;
+			std::vector<Mesh::Texture> textures;
+			Mesh::Material mat;
 
 			for (int i = 0; i < mesh->mNumVertices; i++)
 			{
-				Vertex vert;
+				Mesh::Vertex vert;
 				vert.Position.x = mesh->mVertices[i].x;
 				vert.Position.y = mesh->mVertices[i].y;
 				vert.Position.z = mesh->mVertices[i].z;
@@ -241,7 +242,7 @@ public:
 				vert.Normal.z = mesh->mNormals[i].z;
 
 				
-				if (mesh->mTextureCoords[0]) // Does the mesh contain texture coordinates?
+				if (mesh->mTextureCoords[0]) // Does the mesh contain Mesh::Texture coordinates?
 				{
 					vert.TexCoords.x = mesh->mTextureCoords[0][i].x;
 					vert.TexCoords.y = mesh->mTextureCoords[0][i].y;
@@ -267,9 +268,9 @@ public:
 			{
 				aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-				std::vector<Texture> diffuseMaps = this->loadMaterialTextures(material,aiTextureType_DIFFUSE, "texture_diffuse");
+				std::vector<Mesh::Texture> diffuseMaps = this->loadMaterialTextures(material,aiTextureType_DIFFUSE, "texture_diffuse");
 				textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-				std::vector<Texture> specularMaps = this->loadMaterialTextures(material,aiTextureType_SPECULAR, "texture_specular");
+				std::vector<Mesh::Texture> specularMaps = this->loadMaterialTextures(material,aiTextureType_SPECULAR, "texture_specular");
 				textures.insert(textures.end(), specularMaps.begin(), specularMaps.end() );
 
 				aiColor4D ambient;
@@ -296,10 +297,10 @@ public:
 		}
 
 
-		std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
+		std::vector<Mesh::Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
 		{
 
-			std::vector<Texture> textures;
+			std::vector<Mesh::Texture> textures;
 			for (GLuint i = 0; i < mat->GetTextureCount(type); i++)
 			{
 				aiString str;
@@ -315,8 +316,8 @@ public:
 					}
 				}
 				if (!skip)
-				{ // If texture hasn’t been loaded already, load it
-					Texture texture;
+				{ // If Mesh::Texture hasn’t been loaded already, load it
+					Mesh::Texture texture;
 					texture.id = textureLoader(str.C_Str(), this->directory);
 					texture.type = typeName;
 					texture.path = str;
