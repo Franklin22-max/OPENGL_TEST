@@ -83,6 +83,7 @@ vec4 useSpotLight(SpotLight s_light, vec4 material_ambient, vec4 material_diffus
 
 void main()
 {
+
     // point light
     vec4 color1 = usePointLight(
         p_light1,
@@ -143,12 +144,16 @@ void main()
         material.specular,// specular
         material.shininess
     );
-    
+
     if(material.numTextures > 0)
-      color = color1 + color2 + color3 + vec4(vec3(color4) + vec3(color5) + vec3(color6),0.0);
+      color = color1 + color2 + color3 + color4 + color5 + color6;
     else
         color = color4 + color5 + color6;
+
 }
+
+
+
 
 
 
@@ -162,15 +167,19 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
     // Transform to [0,1] range
     projCoords = projCoords * 0.5 + 0.5;
 
+    if(projCoords.z > 1.0)
+        return 0.0;
+
     // Get closest depth value from light’s perspective (using [0,1] rangefragPosLight as coords)
     float closestDepth = texture(shadowMap, projCoords.xy).r;
 
     // Get depth of current fragment from light’s perspective
     float currentDepth = projCoords.z;
 
+    
+    float bias = 0.005;//max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
     // Check whether current frag pos is in shadow
-    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
-    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+    float shadow = (currentDepth - bias) > closestDepth ? 1.0 : 0.0;
 
     return shadow;
 }
@@ -201,7 +210,8 @@ vec4 useDirectionalLight(DirectionalLight d_light, vec4 material_ambient, vec4 m
 
    // Calculate shadow
     float shadow = ShadowCalculation(fs_in.FragPosLightSpace, normal, lightDir);
-    return (ambient + (1.0 - shadow) * (diffuse + specular));
+    float diffuse_z = diffuse.z;
+    return (ambient +   vec4((1.0 - shadow) * vec3(diffuse + specular), diffuse_z));
 
 }
 
@@ -213,7 +223,7 @@ vec4 usePointLight(PointLight p_light, vec4 material_ambient, vec4 material_diff
 {
 
     // ambient
-    vec4 ambient = vec4(p_light.ambient,1.0f) * material_ambient;
+    vec4 ambient = 0.15 * vec4(p_light.ambient,1.0f) * material_ambient;
 
     // Diffuse
     vec3 normal = normalize(fs_in.Normal);
@@ -239,7 +249,8 @@ vec4 usePointLight(PointLight p_light, vec4 material_ambient, vec4 material_diff
    
    // Calculate shadow
     float shadow = ShadowCalculation(fs_in.FragPosLightSpace, normal, lightDir);
-    return (ambient + (1.0 - shadow) * (diffuse + specular));
+    float diffuse_z = diffuse.z;
+    return (ambient +   vec4((1.0 - shadow) * vec3(diffuse + specular), diffuse_z));
 }
 
 
@@ -279,14 +290,14 @@ vec4 useSpotLight(SpotLight s_light, vec4 material_ambient, vec4 material_diffus
     specular *= intensity;
 
 
+    float diffuse_z = diffuse.z;
     if(theta > s_light.outerCutOff)
-    {
-        
+    {  
        // Calculate shadow
         float shadow = ShadowCalculation(fs_in.FragPosLightSpace, normal, lightDir);
-        return (ambient + (1.0 - shadow) * (diffuse + specular));
+        return (ambient +   vec4((1.0 - shadow) * vec3(diffuse + specular), diffuse_z));
     }
 
-    return vec4(0);
+    return ambient;
 }
 

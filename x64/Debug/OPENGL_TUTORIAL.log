@@ -1,7 +1,16 @@
-﻿  Source.cpp
+﻿  glad.c
+  imgui.cpp
+  imgui_demo.cpp
+  imgui_draw.cpp
+  imgui_impl_glfw.cpp
+  imgui_impl_opengl3.cpp
+  imgui_tables.cpp
+  imgui_widgets.cpp
+  stb_image.cpp
+  Source.cpp
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\StringTools.h(14,42): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\StringTools.h(29,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Texture.h(89,61): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Texture.h(88,61): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Model.h(37,13): warning C4099: 'Mesh': type name first seen using 'class' now seen using 'struct'
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Model.h(37): message : see declaration of 'Mesh'
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Model.h(116,1): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
@@ -18,10 +27,12 @@ C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\M
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(130,1): warning C4305: '=': truncation from 'double' to 'float'
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(141,1): warning C4305: '=': truncation from 'double' to 'float'
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(152,1): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(246,30): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(320,24): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(330,21): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(331,21): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(334,25): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(335,25): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(263,30): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(368,24): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(378,21): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(379,21): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(382,25): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(383,25): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
+  Generating Code...
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   OPENGL_TUTORIAL.vcxproj -> C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\x64\Debug\OPENGL_TUTORIAL.exe

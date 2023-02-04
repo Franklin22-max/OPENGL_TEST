@@ -178,10 +178,10 @@ public:
 	{
 		Bind();
 		glBindTexture(GL_TEXTURE_2D, textureID);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, Textureattachment, GL_TEXTURE_2D, textureID, 0);
+		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, Textureattachment, GL_TEXTURE_2D, textureID, 0));
 
 		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, RBattachment, GL_RENDERBUFFER, rbo);
+		GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, RBattachment, GL_RENDERBUFFER, rbo));
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			std::cout << "FrameBuffer Incomplete" << std::endl;
@@ -192,7 +192,7 @@ public:
 	{
 		Bind();
 		glBindTexture(GL_TEXTURE_2D, textureID);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, attachment , GL_TEXTURE_2D, textureID, 0);
+		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, attachment , GL_TEXTURE_2D, textureID, 0));
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			std::cout << "FrameBuffer Incomplete" << std::endl;
 		unBind();
@@ -202,7 +202,7 @@ public:
 	{
 		Bind();
 		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+		GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo));
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			std::cout << "FrameBuffer Incomplete" << std::endl;
 		unBind();

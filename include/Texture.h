@@ -3,7 +3,7 @@
 
 #include "Common.h"
 #include <string>
-#include "../vendor/stb_image/stb_image.h"
+#include "stb_image.h"
 #include <filesystem>
 #include "StringTools.h"
 
@@ -52,11 +52,10 @@ inline GLuint GenDepthTexture(GLsizei width, GLsizei height, GLint BMP = 0, unsi
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, BMP, GL_DEPTH_COMPONENT, GL_FLOAT, image);
 
-
     for (int i = 0; i < Texparams.size(); i++)
         glTexParameteri(GL_TEXTURE_2D, Texparams[i].pname, Texparams[i].param);
 
-    glGenerateMipmap(GL_TEXTURE_2D);
+    //glGenerateMipmap(GL_TEXTURE_2D);
 
     glBindTexture(GL_TEXTURE_2D, 0);
     return texture;

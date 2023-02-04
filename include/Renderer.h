@@ -46,22 +46,36 @@ public:
     static std::vector<PointLight*> p_lights;
     static std::vector<SpotLight*> s_lights;
 
+    static int shadowMapWidth;
+    static int shadowMapHeight;
+
 
 public:
 
-    static void Init(Camera* camera, int framebufferWidth = 1024, int framebufferHeight = 1024)
+    static void Init(Camera* camera, int shadowMapWidth = 2048, int shadowMapHeight = 2048)
     {
         if (!is_initialized)
         {
             Renderer::camera = camera;
 
-            depthTexture = GenDepthTexture(1024, 1024, 0, NULL, {
+            depthTexture = GenDepthTexture(shadowMapWidth, shadowMapHeight, 0, NULL, {
                             TexturParameters(GL_TEXTURE_MIN_FILTER, GL_NEAREST),
                             TexturParameters(GL_TEXTURE_MAG_FILTER, GL_NEAREST),
-                            TexturParameters(GL_TEXTURE_WRAP_S, GL_REPEAT),
-                            TexturParameters(GL_TEXTURE_WRAP_T, GL_REPEAT)
+                            TexturParameters(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER),
+                            TexturParameters(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER)
                 });
+
+            //glBindTexture(GL_TEXTURE_2D, depthTexture);
+
+            //GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+           // glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
             shadowFBO = new FrameBuffer();
+
+            shadowFBO->Bind();
+            glDrawBuffer(GL_NONE);
+            glReadBuffer(GL_NONE);
+
             shadowFBO->AttachTexture(depthTexture, GL_DEPTH_ATTACHMENT);
 
             //                                  LOAD AND COMPILE SHADERS
@@ -80,59 +94,55 @@ public:
 
 public:
 
-   
-
     //                                  SHADOW POST PROCESS
     static GLuint depthTexture;
     static FrameBuffer* shadowFBO;
-    static glm::mat4 lightMV;
+    static glm::mat4 lightVP;
 
 
     static void FillShadowDepthData()
     {
-        glEnable(GL_DEPTH_TEST);
+        
         shadowFBO->Bind();
-
-        glDrawBuffer(GL_NONE);
-        glReadBuffer(GL_NONE);
-
-        glViewport(0, 0, 1024, 1024);
+        glEnable(GL_DEPTH_TEST);
+        glViewport(0, 0, shadowMapWidth, shadowMapHeight);
         glClear(GL_DEPTH_BUFFER_BIT);
 
-        GLfloat near_plane = 0.1f, far_plane = 1000.5f;
-        glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f,near_plane, far_plane);
-        glm::mat4 lightView = glm::lookAt( s_lights[0]->position , s_lights[0]->direction, {0.0, 1.f, 0.0});
+        GLfloat near_plane = 0.1f, far_plane = 200.f;
+        //glm::mat4 lightProjection = glm::perspective(glm::radians(45.f),(GLfloat)1 ,near_plane, far_plane);
+        glm::mat4 lightProjection = glm::ortho(0.f, 200.f, 0.f, 200.f, near_plane, far_plane);
+        glm::mat4 lightView = glm::lookAt( s_lights[0]->position , s_lights[0]->position + s_lights[0]->direction, {0.0, 1.0f, 0.0});
 
-        lightMV = lightProjection * lightView;
+        lightVP = lightProjection * lightView;
+  
+
         shaders[SHADER_TYPE::SHADOW_DEPTH_SHADER]->Use();
-        Shader::linkUnformMatrix4fv(*shaders[SHADER_TYPE::SHADOW_DEPTH_SHADER],"lightMV", glm::value_ptr(lightMV));
+        Shader::linkUnformMatrix4fv(*shaders[SHADER_TYPE::SHADOW_DEPTH_SHADER],"lightVP", glm::value_ptr(lightVP));
 
         for (int i = 0; i < Renderer::models.size(); i++)
         {
             Renderer::models[i]->Draw(shaders[SHADER_TYPE::SHADOW_DEPTH_SHADER]);
         }
 
-        glDisable(GL_DEPTH_TEST);
         shadowFBO->unBind();
+        glDisable(GL_DEPTH_TEST);
     }
 
     static void ShadowHandling()
     {
         glEnable(GL_DEPTH_TEST);
         glViewport(0, 0, 800, 600);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        
+        //bind shadow texture 
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, depthTexture);
 
         shaders[SHADER_TYPE::OBJ_SHADER]->Use();
-        Shader::linkUnformMatrix4fv(*shaders[SHADER_TYPE::OBJ_SHADER], "lightMV", glm::value_ptr(lightMV));
-        Shader::linkUnform1i(*shaders[SHADER_TYPE::OBJ_SHADER], "shadowMap", 31);
-
-        // bind shadow texture 
-        glActiveTexture(GL_TEXTURE31);
-        glBindTexture(GL_TEXTURE_2D, depthTexture);
+        Shader::linkUnformMatrix4fv(*shaders[SHADER_TYPE::OBJ_SHADER], "lightVP", glm::value_ptr(lightVP));
+        Shader::linkUnform1i(*shaders[SHADER_TYPE::OBJ_SHADER], "shadowMap", 3);
 
         for (int i = 0; i < models.size(); i++)
             models[i]->Draw();
-
     }
 
 
@@ -162,7 +172,7 @@ public:
             // handle shadow post processing
             FillShadowDepthData();
             glViewport(0, 0, 800, 600);
-            //ShadowHandling();
+            ShadowHandling();
             
 
             lastCamPos = camera->Position;
@@ -182,11 +192,12 @@ public:
     }
 };
 
-
+inline int Renderer::shadowMapWidth;
+inline int Renderer::shadowMapHeight;
 inline GLuint Renderer::quadVAB;
 inline GLuint Renderer::quadIBO;
 inline GLuint Renderer::quadVBO;
-inline glm::mat4 Renderer::lightMV;
+inline glm::mat4 Renderer::lightVP;
 inline bool Renderer::is_initialized = false;
 inline GLuint Renderer::depthTexture;
 inline FrameBuffer* Renderer::shadowFBO = nullptr;

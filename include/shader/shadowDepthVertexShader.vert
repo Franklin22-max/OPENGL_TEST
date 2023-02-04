@@ -2,12 +2,10 @@
 
 layout(location=0) in vec3 position;
 
-uniform mat4 lightMV;
-
+uniform mat4 lightVP;
 uniform mat4 model;
-
 
 void main()
 {
-	gl_Position = lightMV * model * vec4(position,1.0f);
+	gl_Position = lightVP * model * vec4(position,1.0f);
 }

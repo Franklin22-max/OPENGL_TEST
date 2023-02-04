@@ -23,7 +23,11 @@
 #include "Skybox.h"
 #include "CustomShaders.h"
 
-#include "vendor/stb_image/stb_image.h"
+#include <stb_image.h>
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 #define PI 3.1415926535897932384626433832795
 
@@ -101,6 +105,7 @@ int main(int args, char** argv)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
 
     GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "OpenGL", nullptr, nullptr);
@@ -119,6 +124,23 @@ int main(int args, char** argv)
 
     glfwSwapInterval(1);
 
+
+    const char* glsl_version = "#version 330";
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsLight();
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init(glsl_version);
+
     if (!gladLoadGL())
     {
         std::cout << "Failed to initialize glad" << std::endl;
@@ -129,10 +151,12 @@ int main(int args, char** argv)
     std::cout << glGetString(GL_VERSION);
 
     glViewport(0, 0, screenWidth, screenHeight);
-    //glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_STENCIL_TEST);
-    //glEnable(GL_CULL_FACE);
-    //glEnable(GL_FRAMEBUFFER_SRGB);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_STENCIL_TEST);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_FRAMEBUFFER_SRGB);
+    glEnable(GL_MULTISAMPLE);
+
 
 
     glEnable(GL_BLEND);
@@ -156,7 +180,8 @@ int main(int args, char** argv)
     Shader& object_shader = *Renderer::shaders[SHADER_TYPE::OBJ_SHADER];
 
     Model seaHawk(R"(C:\Users\FRANKLIN\Documents\My 3D Models\SeaHawk\SeaHawk.obj)", object_shader, MODEL_TYPE::WORLD_OBJECT);
-    seaHawk.model = glm::translate(seaHawk.model, { -200.f,1.f,-50 });
+    seaHawk.model = glm::translate(seaHawk.model, { 0.f,50.f,0 });
+    
 
     Model livingRoom(R"(C:\Users\FRANKLIN\Documents\My 3D Models\living_room\InteriorTest.obj)", object_shader, MODEL_TYPE::WORLD_OBJECT);
     livingRoom.model = glm::translate(livingRoom.model, { 0.f,0.f,-50 });
@@ -171,20 +196,19 @@ int main(int args, char** argv)
     plane.model = glm::translate(plane.model, { 0.f,-1.f,-200 });
     plane.model = glm::translate(plane.model, { 0.f,-1.f,-200 });
     plane.model = glm::scale(plane.model, { 500,500,500 });
-
-    plane.model = glm::rotate(plane.model,glm::radians(90.f), { 0.f, 1.f, 0.f });
+    //plane.model = glm::rotate(plane.model,glm::radians(45.f), { 0.f, 0.f, 1.f });
     
 
-    Renderer::models.push_back(&tree);
     Renderer::models.push_back(&plane);
+    //Renderer::models.push_back(&tree);
     Renderer::models.push_back(&seaHawk);
-    Renderer::models.push_back(&livingRoom);
+    //Renderer::models.push_back(&livingRoom);
 
     
     // light
     DirectonLight d_light;
     PointLight p_light({ 80,200, 200 }, 1.0f);
-    SpotLight s_light({0.f, 450.f, 0.f});
+    SpotLight s_light({0.f, 200.f, 0.f});
 
     Renderer::d_lights.push_back(&d_light);
     Renderer::s_lights.push_back(&s_light);
@@ -192,18 +216,10 @@ int main(int args, char** argv)
     
 
     object_shader.Use();
-    Shader::linkDirectionalLight(object_shader, std::string("d_light1"), d_light);
-    Shader::linkPointlLight(object_shader, std::string("p_light1"), p_light);
+    //Shader::linkDirectionalLight(object_shader, std::string("d_light1"), d_light);
+    //Shader::linkPointlLight(object_shader, std::string("p_light1"), p_light);
     Shader::linkSpotLight(object_shader, std::string("s_light1"), s_light);
 
-    Model lightSquare(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Sphere\Sphere.obj)", *Renderer::shaders[SHADER_TYPE::LIGHT_SHADER], MODEL_TYPE::LUMINUS_OBJECT);
-    lightSquare.model = glm::translate(lightSquare.model, p_light.position);
-    lightSquare.model = glm::scale(lightSquare.model, {10,10,10});
-
-
-    Renderer::shaders[SHADER_TYPE::LIGHT_SHADER]->Use();
-    Shader::linkUnform3f(*Renderer::shaders[SHADER_TYPE::LIGHT_SHADER], "lightColor",  &p_light.diffuse);
-    Renderer::models.push_back(&lightSquare);
 
     // view matrix
     glm::mat4 view = glm::identity<glm::mat4>();
@@ -214,7 +230,6 @@ int main(int args, char** argv)
     
     UniformBuffer uniformB(0, "Matrices", 2 * sizeof(glm::mat4));
     uniformB.linkShader(object_shader.Program());
-    uniformB.linkShader(Renderer::shaders[SHADER_TYPE::LIGHT_SHADER]->Program());
 
 
 
@@ -240,6 +255,8 @@ int main(int args, char** argv)
     glBindBuffer(GL_VERTEX_ARRAY, 0);
     glBindVertexArray(0);
     
+
+    bool show_depth_texture = false;
     // Program loop
     while (!glfwWindowShouldClose(window))
     {
@@ -247,8 +264,6 @@ int main(int args, char** argv)
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         elapseTime += deltaTime;
-
-
 
         if (elapseTime > 0.3f)
         {
@@ -266,8 +281,28 @@ int main(int args, char** argv)
         // clear
         Renderer::Clear();
 
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
+        {
+            ImGui::Begin("OPENGL");                          // Create a window called "Hello, world!" and append into it.
+            //ImGui::SliderFloat3("translateA", &translationA.x, 0.0f, 600.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::SliderFloat3("spot light Direction", &s_light.direction.x, -600.0f, 600.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::SliderFloat3("spot light position", &s_light.position.x, 0.0f, 600.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::SliderFloat3("spot light ambient color", &s_light.ambient.x, 0.0f, 3.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::SliderFloat3("spot light diffuse color", &s_light.diffuse.x, 0.0f, 3.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::SliderFloat3("spot light specular color", &s_light.specular.x, 0.0f, 3.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            
+            ImGui::Checkbox("Show Depth Texture", &show_depth_texture);
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::End();
+        }
+
         view = camera.GetViewMatrix();
-        projection = glm::perspective(glm::radians(camera.Zoom), (GLfloat)(screenWidth / screenHeight), 0.1f, 2000.0f);
+        projection = glm::perspective(glm::radians(camera.Zoom), (GLfloat)(screenWidth / screenHeight), 0.1f, 1000.0f);
 
         // lamp positin and translation
         glm::mat4 _view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
@@ -283,16 +318,29 @@ int main(int args, char** argv)
         uniformB.Subdata(0, sizeof(glm::mat4), glm::value_ptr(projection));
         uniformB.Subdata(sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
 
+        object_shader.Use();
+        Shader::linkSpotLight(object_shader, std::string("s_light1"), s_light);
+
         //Draw Models
         Renderer::DrawModels();
 
-        Renderer::shaders[SHADER_TYPE::BASIC_SHADER]->Use();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, Renderer::depthTexture);
 
-        glBindVertexArray(VAO);
-        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
-        glBindVertexArray(0);
+        if (show_depth_texture)
+        {
+            Renderer::shaders[SHADER_TYPE::BASIC_SHADER]->Use();
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, Renderer::depthTexture);
+
+            glBindVertexArray(VAO);
+            GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
+            glBindVertexArray(0);
+        }
+        
+
+        // Rendering
+        ImGui::Render();
+
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // Swap the buffers
         glfwSwapBuffers(window);
