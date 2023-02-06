@@ -180,7 +180,7 @@ int main(int args, char** argv)
     Shader& object_shader = *Renderer::shaders[SHADER_TYPE::OBJ_SHADER];
 
     Model seaHawk(R"(C:\Users\FRANKLIN\Documents\My 3D Models\SeaHawk\SeaHawk.obj)", object_shader, MODEL_TYPE::WORLD_OBJECT);
-    seaHawk.model = glm::translate(seaHawk.model, { 0.f,50.f,0 });
+    seaHawk.model = glm::translate(seaHawk.model, { 150.f,0.f,0 });
     
 
     Model livingRoom(R"(C:\Users\FRANKLIN\Documents\My 3D Models\living_room\InteriorTest.obj)", object_shader, MODEL_TYPE::WORLD_OBJECT);
@@ -189,17 +189,29 @@ int main(int args, char** argv)
 
     Model tree(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Tree\Tree.obj)", object_shader, MODEL_TYPE::WORLD_OBJECT);
     tree.model = glm::translate(tree.model, {-50.f,0.f,50});
-    tree.model = glm::scale(tree.model, { 20,20,20 });
+        tree.model = glm::scale(tree.model, { 20,20,20 });
 
 
     Model plane(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Plane\Plane.obj)", object_shader, MODEL_TYPE::WORLD_OBJECT);
     plane.model = glm::translate(plane.model, { 0.f,-1.f,-200 });
-    plane.model = glm::translate(plane.model, { 0.f,-1.f,-200 });
     plane.model = glm::scale(plane.model, { 500,500,500 });
     //plane.model = glm::rotate(plane.model,glm::radians(45.f), { 0.f, 0.f, 1.f });
+
+    Model Cube(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Cube\Cube.obj)", object_shader, MODEL_TYPE::WORLD_OBJECT);
+    Cube.model = glm::translate(Cube.model, { 100.f,50.f,0 });
+    Cube.model = glm::rotate(Cube.model,glm::radians(45.f), {0.f,0.f,1.f});
+    Cube.model = glm::scale(Cube.model, { 20,20,20 });
+
+    Model Cube2(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Cube\Cube.obj)", object_shader, MODEL_TYPE::WORLD_OBJECT);
+    Cube2.model = glm::translate(Cube2.model, { 100.f,50.f,-100 });
+    Cube2.model = glm::rotate(Cube2.model, glm::radians(45.f), { 0.f,0.f,1.f });
+    Cube2.model = glm::scale(Cube2.model, { 20,20,20 });
+
     
 
     Renderer::models.push_back(&plane);
+    Renderer::models.push_back(&Cube);
+    Renderer::models.push_back(&Cube2);
     //Renderer::models.push_back(&tree);
     Renderer::models.push_back(&seaHawk);
     //Renderer::models.push_back(&livingRoom);
@@ -208,7 +220,7 @@ int main(int args, char** argv)
     // light
     DirectonLight d_light;
     PointLight p_light({ 80,200, 200 }, 1.0f);
-    SpotLight s_light({0.f, 200.f, 0.f});
+    SpotLight s_light({0.f, 50.f, 50.f});
 
     Renderer::d_lights.push_back(&d_light);
     Renderer::s_lights.push_back(&s_light);
@@ -217,7 +229,8 @@ int main(int args, char** argv)
 
     object_shader.Use();
     //Shader::linkDirectionalLight(object_shader, std::string("d_light1"), d_light);
-    //Shader::linkPointlLight(object_shader, std::string("p_light1"), p_light);
+    //
+    Shader::linkPointlLight(object_shader, std::string("p_light1"), p_light);
     Shader::linkSpotLight(object_shader, std::string("s_light1"), s_light);
 
 
@@ -290,20 +303,23 @@ int main(int args, char** argv)
         {
             ImGui::Begin("OPENGL");                          // Create a window called "Hello, world!" and append into it.
             //ImGui::SliderFloat3("translateA", &translationA.x, 0.0f, 600.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::SliderFloat3("spot light Direction", &s_light.direction.x, -600.0f, 600.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::SliderFloat3("spot light position", &s_light.position.x, 0.0f, 600.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::SliderFloat3("Camera Direction", &camera.Front.x, -1.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::SliderFloat3("Camera Position", &camera.Position.x, -600.0f, 600.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            
+            ImGui::SliderFloat3("spot light Direction", &s_light.direction.x, -1.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::SliderFloat3("spot light position", &s_light.position.x, -600.0f, 600.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
             ImGui::SliderFloat3("spot light ambient color", &s_light.ambient.x, 0.0f, 3.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
             ImGui::SliderFloat3("spot light diffuse color", &s_light.diffuse.x, 0.0f, 3.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
             ImGui::SliderFloat3("spot light specular color", &s_light.specular.x, 0.0f, 3.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
             
             ImGui::Checkbox("Show Depth Texture", &show_depth_texture);
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS), (Rstream %s)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate, Renderer::RenderStream.str().c_str());
             ImGui::End();
         }
 
         view = camera.GetViewMatrix();
         projection = glm::perspective(glm::radians(camera.Zoom), (GLfloat)(screenWidth / screenHeight), 0.1f, 1000.0f);
-
+       
         // lamp positin and translation
         glm::mat4 _view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
 

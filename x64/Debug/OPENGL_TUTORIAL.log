@@ -1,13 +1,4 @@
-﻿  glad.c
-  imgui.cpp
-  imgui_demo.cpp
-  imgui_draw.cpp
-  imgui_impl_glfw.cpp
-  imgui_impl_opengl3.cpp
-  imgui_tables.cpp
-  imgui_widgets.cpp
-  stb_image.cpp
-  Source.cpp
+﻿  Source.cpp
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\StringTools.h(14,42): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\StringTools.h(29,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Texture.h(88,61): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
@@ -27,12 +18,11 @@ C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\M
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(130,1): warning C4305: '=': truncation from 'double' to 'float'
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(141,1): warning C4305: '=': truncation from 'double' to 'float'
 C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\include\Material.h(152,1): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(263,30): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(368,24): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(378,21): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(379,21): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(382,25): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(383,25): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
-  Generating Code...
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(276,30): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(384,24): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(394,21): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(395,21): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(398,25): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\Source.cpp(399,25): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
 LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   OPENGL_TUTORIAL.vcxproj -> C:\Users\FRANKLIN\Documents\My Programs\C++\VISUAL_STUDIOS\OPENGL_TEST\x64\Debug\OPENGL_TUTORIAL.exe

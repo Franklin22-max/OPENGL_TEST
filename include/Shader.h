@@ -129,7 +129,6 @@ public:
 
     GLint GetUniformLocation(const std::string& name)
     {
-
         
         if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
             return m_UniformLocationCache[name];
@@ -144,6 +143,7 @@ public:
         return location;
 
     }
+
     // Use the program
     void Use()
     {

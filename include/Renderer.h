@@ -49,14 +49,18 @@ public:
     static int shadowMapWidth;
     static int shadowMapHeight;
 
+    static std::stringstream RenderStream;
+
 
 public:
 
-    static void Init(Camera* camera, int shadowMapWidth = 2048, int shadowMapHeight = 2048)
+    static void Init(Camera* camera, int shadowMapWidth = 1000, int shadowMapHeight = 1000)
     {
         if (!is_initialized)
         {
             Renderer::camera = camera;
+            Renderer::shadowMapWidth = shadowMapWidth;
+            Renderer::shadowMapHeight = shadowMapHeight;
 
             depthTexture = GenDepthTexture(shadowMapWidth, shadowMapHeight, 0, NULL, {
                             TexturParameters(GL_TEXTURE_MIN_FILTER, GL_NEAREST),
@@ -65,10 +69,10 @@ public:
                             TexturParameters(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER)
                 });
 
-            //glBindTexture(GL_TEXTURE_2D, depthTexture);
+            glBindTexture(GL_TEXTURE_2D, depthTexture);
 
-            //GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
-           // glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+            GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
             shadowFBO = new FrameBuffer();
 
@@ -102,31 +106,33 @@ public:
 
     static void FillShadowDepthData()
     {
-        
-        shadowFBO->Bind();
-        glEnable(GL_DEPTH_TEST);
-        glViewport(0, 0, shadowMapWidth, shadowMapHeight);
-        glClear(GL_DEPTH_BUFFER_BIT);
+       
 
-        GLfloat near_plane = 0.1f, far_plane = 200.f;
-        //glm::mat4 lightProjection = glm::perspective(glm::radians(45.f),(GLfloat)1 ,near_plane, far_plane);
-        glm::mat4 lightProjection = glm::ortho(0.f, 200.f, 0.f, 200.f, near_plane, far_plane);
-        glm::mat4 lightView = glm::lookAt( s_lights[0]->position , s_lights[0]->position + s_lights[0]->direction, {0.0, 1.0f, 0.0});
+        GLfloat near_plane = 1.0f, far_plane = 700.f;
+        glm::mat4 lightProjection = glm::perspective(glm::radians(65.f), (GLfloat)shadowMapWidth / shadowMapHeight, near_plane, far_plane);
+        glm::mat4 lightView = glm::lookAt(s_lights[0]->position, s_lights[0]->position + s_lights[0]->direction, { 0.0f, 1.0f, 0.0f });
 
         lightVP = lightProjection * lightView;
-  
+
+        shadowFBO->Bind();
+        glViewport(0, 0, shadowMapWidth, shadowMapHeight);
+
+        glEnable(GL_DEPTH_TEST);
+        glClear(GL_DEPTH_BUFFER_BIT);
 
         shaders[SHADER_TYPE::SHADOW_DEPTH_SHADER]->Use();
-        Shader::linkUnformMatrix4fv(*shaders[SHADER_TYPE::SHADOW_DEPTH_SHADER],"lightVP", glm::value_ptr(lightVP));
+        Shader::linkUnformMatrix4fv(*shaders[SHADER_TYPE::SHADOW_DEPTH_SHADER], "lightVP", glm::value_ptr(lightVP));
 
         for (int i = 0; i < Renderer::models.size(); i++)
         {
             Renderer::models[i]->Draw(shaders[SHADER_TYPE::SHADOW_DEPTH_SHADER]);
         }
-
+       
         shadowFBO->unBind();
         glDisable(GL_DEPTH_TEST);
     }
+
+
 
     static void ShadowHandling()
     {
@@ -192,6 +198,7 @@ public:
     }
 };
 
+inline std::stringstream Renderer::RenderStream;
 inline int Renderer::shadowMapWidth;
 inline int Renderer::shadowMapHeight;
 inline GLuint Renderer::quadVAB;

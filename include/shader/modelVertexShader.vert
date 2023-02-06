@@ -32,6 +32,7 @@ void main()
     vs_out.FragPos = vec3(model * vec4(position, 1.0f));// get fragment position in world space
     vs_out.Normal = mat3(transpose(inverse(model))) * normal;
     vs_out.TexCoords = vec2(texCoord.x, 1.0 - texCoord.y);
-    vs_out.FragPosLightSpace =  lightVP * vec4(vs_out.FragPos,1.0f);
+
+    vs_out.FragPosLightSpace =  lightVP * model * vec4(position,1.0f);
 
 }

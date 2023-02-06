@@ -86,8 +86,8 @@ struct SpotLight : Light
     float cutOff;
     float outerCutOff;
 
-    SpotLight(glm::vec3 position, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float cutOff = glm::cos(glm::radians(5.f)), float outerCutOff = glm::cos(glm::radians(25.f)))
-        : position(position), cutOff(cutOff), outerCutOff(outerCutOff)
+    SpotLight(glm::vec3 position, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, glm::vec3 direction, float cutOff = glm::cos(glm::radians(15.f)), float outerCutOff = glm::cos(glm::radians(30.f)))
+        : position(position), cutOff(cutOff), outerCutOff(outerCutOff), direction(direction)
     {
         this->ambient = ambient;
         this->diffuse = diffuse;
@@ -97,9 +97,9 @@ struct SpotLight : Light
     SpotLight(glm::vec3 position)
         :position(position)
     {
-        cutOff = glm::cos(glm::radians(5.f));
-        outerCutOff = glm::cos(glm::radians(25.f));
-        direction = glm::vec3(0.0f, -1.f, 0.0);
+        cutOff = glm::cos(glm::radians(15.f));
+        outerCutOff = glm::cos(glm::radians(30.f));
+        direction = glm::vec3(0.0f, -1.f, -0.5);
         ambient = glm::vec3(0.15f, 0.15f, 0.15f);
         diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
         specular = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -110,7 +110,7 @@ struct SpotLight : Light
     {
         this->cutOff = cutOff;
         this->outerCutOff = outerCutOff;
-        direction = glm::vec3(0.0f, -1.f, 0.0);
+        direction = glm::vec3(0.0f, -1.f, -0.5);
         ambient = glm::vec3(0.15f, 0.15f, 0.15f);
         diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
         specular = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -118,9 +118,9 @@ struct SpotLight : Light
 
     SpotLight()
     {
-        cutOff = glm::cos(glm::radians(5.f));
-        outerCutOff = glm::cos(glm::radians(25.f));
-        direction = glm::vec3(0.0f, -1.f, 0.0);
+        cutOff = glm::cos(glm::radians(15.f));
+        outerCutOff = glm::cos(glm::radians(30.f));
+        direction = glm::vec3(0.0f, -1.f, -0.5);
         position = glm::vec3(0, 0, 0);
         ambient = glm::vec3(0.15f, 0.15f, 0.15f);
         diffuse = glm::vec3(1.0f, 1.0f, 1.0f);

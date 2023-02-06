@@ -163,9 +163,9 @@ public:
 	}
 	
 
-	virtual void Draw(Shader* shader = nullptr)
+	virtual void Draw(Shader* alternativeShader = nullptr)
 	{
-		Shader* nShader = (shader != nullptr) ? shader : &this->shader;
+		Shader* nShader = (alternativeShader != nullptr) ? alternativeShader : &this->shader;
 		nShader->Use();
 		Shader::linkUnformMatrix4fv(*nShader, "model", glm::value_ptr(model), 1, GL_FALSE);
 
