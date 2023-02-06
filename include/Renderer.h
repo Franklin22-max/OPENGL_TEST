@@ -1,38 +1,221 @@
 #ifndef RENDERER_H_INCLUDED
 #define RENDERER_H_INCLUDED
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+
+#include <unordered_map>
+#include <stdint.h>
+
+
+
 #include "Shader.h"
+#include "CustomShaders.h"
 #include "BufferOBJ.h"
+#include "Model.h"
+#include "Light.h"
+#include "Camera.h"
+
+
+
+enum class SHADER_TYPE : uint8_t 
+{
+    OBJ_SHADER,
+    LIGHT_SHADER,
+    SHADOW_DEPTH_SHADER,
+    BLOOM_SHADER,
+    SKYBOX_SHADER,
+    BASIC_SHADER,
+};
+
+
 
 
 class Renderer
 {
-    public:
-        static void Clear()
-        {
-            // Rendering commands here
-            glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        }
 
-        static void DrawElements(const vertexArray& VAO, const GLuint& EBO, Shader& shader,GLsizei count = 1)
-        {
-            shader.Use();
-            glBindVertexArray(VAO.VAO);
-            glDrawElements(GL_TRIANGLES,count,GL_UNSIGNED_INT, nullptr);
-            glBindVertexArray(0);
-        };
+public:
+    static GLuint quadVAB;
+    static GLuint quadIBO;
+    static GLuint quadVBO;
 
-        static void DrawArray(const vertexArray& VAO, Shader& shader, GLsizei count = 1)
+    static bool is_initialized;
+    static glm::vec3 lastCamPos;
+    static Camera* camera;
+    static std::vector<Model*> models;
+    static std::unordered_map<SHADER_TYPE, Shader*> shaders;
+    static std::vector<DirectonLight*> d_lights;
+    static std::vector<PointLight*> p_lights;
+    static std::vector<SpotLight*> s_lights;
+
+    static int shadowMapWidth;
+    static int shadowMapHeight;
+
+    static std::stringstream RenderStream;
+
+
+public:
+
+    static void Init(Camera* camera, int shadowMapWidth = 1000, int shadowMapHeight = 1000)
+    {
+        if (!is_initialized)
         {
-            shader.Use();
-            glBindVertexArray(VAO.VAO);
-            glDrawArrays(GL_TRIANGLES,0,count);
-            glBindVertexArray(0);
+            Renderer::camera = camera;
+            Renderer::shadowMapWidth = shadowMapWidth;
+            Renderer::shadowMapHeight = shadowMapHeight;
+
+            depthTexture = GenDepthTexture(shadowMapWidth, shadowMapHeight, 0, NULL, {
+                            TexturParameters(GL_TEXTURE_MIN_FILTER, GL_NEAREST),
+                            TexturParameters(GL_TEXTURE_MAG_FILTER, GL_NEAREST),
+                            TexturParameters(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER),
+                            TexturParameters(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER)
+                });
+
+            glBindTexture(GL_TEXTURE_2D, depthTexture);
+
+            GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+            shadowFBO = new FrameBuffer();
+
+            shadowFBO->Bind();
+            glDrawBuffer(GL_NONE);
+            glReadBuffer(GL_NONE);
+
+            shadowFBO->AttachTexture(depthTexture, GL_DEPTH_ATTACHMENT);
+
+            //                                  LOAD AND COMPILE SHADERS
+            shaders[SHADER_TYPE::OBJ_SHADER] = new ModelShader("include/shader/modelVertexShader.vert", "include/shader/modelFragmentShader.frag");
+            shaders[SHADER_TYPE::LIGHT_SHADER] = new Shader("include/shader/lightVertexShader.vert", "include/shader/lightFragmentShader.frag");
+            shaders[SHADER_TYPE::SKYBOX_SHADER] = new Shader("include/shader/skyboxVertexShader.vert", "include/shader/skyboxFragmentShader.frag");
+            shaders[SHADER_TYPE::SHADOW_DEPTH_SHADER] = new Shader("include/shader/shadowDepthVertexShader.vert", "include/shader/shadowDepthFragShader.frag");
+            //shaders[SHADER_TYPE::BLOOM_SHADER] = new Shader("include/shader/bloomVertexShader.vert", "include/shader/bloomFragmentShader.frag");
+            shaders[SHADER_TYPE::BASIC_SHADER] = new Shader("include/shader/basicVertexShader.vert", "include/shader/basicFragmentShader.frag");
+
+            //                                  LOAD UP QUAD DATA
+
+            is_initialized = true;
         }
+    }
+
+public:
+
+    //                                  SHADOW POST PROCESS
+    static GLuint depthTexture;
+    static FrameBuffer* shadowFBO;
+    static glm::mat4 lightVP;
+
+
+    static void FillShadowDepthData()
+    {
+       
+
+        GLfloat near_plane = 1.0f, far_plane = 700.f;
+        glm::mat4 lightProjection = glm::perspective(glm::radians(65.f), (GLfloat)shadowMapWidth / shadowMapHeight, near_plane, far_plane);
+        glm::mat4 lightView = glm::lookAt(s_lights[0]->position, s_lights[0]->position + s_lights[0]->direction, { 0.0f, 1.0f, 0.0f });
+
+        lightVP = lightProjection * lightView;
+
+        shadowFBO->Bind();
+        glViewport(0, 0, shadowMapWidth, shadowMapHeight);
+
+        glEnable(GL_DEPTH_TEST);
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        shaders[SHADER_TYPE::SHADOW_DEPTH_SHADER]->Use();
+        Shader::linkUnformMatrix4fv(*shaders[SHADER_TYPE::SHADOW_DEPTH_SHADER], "lightVP", glm::value_ptr(lightVP));
+
+        for (int i = 0; i < Renderer::models.size(); i++)
+        {
+            Renderer::models[i]->Draw(shaders[SHADER_TYPE::SHADOW_DEPTH_SHADER]);
+        }
+       
+        shadowFBO->unBind();
+        glDisable(GL_DEPTH_TEST);
+    }
+
+
+
+    static void ShadowHandling()
+    {
+        glEnable(GL_DEPTH_TEST);
+        glViewport(0, 0, 800, 600);
+        
+        //bind shadow texture 
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, depthTexture);
+
+        shaders[SHADER_TYPE::OBJ_SHADER]->Use();
+        Shader::linkUnformMatrix4fv(*shaders[SHADER_TYPE::OBJ_SHADER], "lightVP", glm::value_ptr(lightVP));
+        Shader::linkUnform1i(*shaders[SHADER_TYPE::OBJ_SHADER], "shadowMap", 3);
+
+        for (int i = 0; i < models.size(); i++)
+            models[i]->Draw();
+    }
+
+
+
+    //                                  BLOOM POST PROCESS
+
+    
+public:
+
+    
+        
+    static void Clear()
+    {
+        // Rendering commands here
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    }
+
+    static void DrawModels()
+    {
+        if (is_initialized)
+        {
+            // sort models relative to cam position
+            if (lastCamPos != camera->Position)
+                SortModels(camera->Position);
+
+            // handle shadow post processing
+            FillShadowDepthData();
+            glViewport(0, 0, 800, 600);
+            ShadowHandling();
+            
+
+            lastCamPos = camera->Position;
+        }
+    }
+
+
+    static void SortModels(glm::vec3& camPos) {
+
+        std::sort(models.begin(), models.end(), [camPos](const Model* _1, const Model* _2) {
+
+            glm::vec3 pos1 = { _1->model[3][0], _1->model[3][1], _1->model[3][2] };
+            glm::vec3 pos2 = { _2->model[3][0], _2->model[3][1], _2->model[3][2] };
+
+            return (glm::length(pos1 - camPos) > glm::length(pos2 - camPos));
+        });
+    }
 };
+
+inline std::stringstream Renderer::RenderStream;
+inline int Renderer::shadowMapWidth;
+inline int Renderer::shadowMapHeight;
+inline GLuint Renderer::quadVAB;
+inline GLuint Renderer::quadIBO;
+inline GLuint Renderer::quadVBO;
+inline glm::mat4 Renderer::lightVP;
+inline bool Renderer::is_initialized = false;
+inline GLuint Renderer::depthTexture;
+inline FrameBuffer* Renderer::shadowFBO = nullptr;
+inline glm::vec3 Renderer::lastCamPos;
+inline Camera* Renderer::camera;
+inline std::unordered_map<SHADER_TYPE, Shader*> Renderer::shaders;
+inline std::vector<Model*> Renderer::models;
+inline std::vector<DirectonLight*> Renderer::d_lights;
+inline std::vector<PointLight*> Renderer::p_lights;
+inline std::vector<SpotLight*> Renderer::s_lights;
+
 
 
 #endif // RENDERER_H_INCLUDED

@@ -10,7 +10,12 @@
 *.log
 *ipdb
 *.pdb
+*.vsidx
+*.db
+*.db-shm
 
+.vs
+.x64
 .Dependencies/assimp/
 .x64/Debug/assimp-vc143-mt.dll
 .x64/Release/assimp-vc143-mt.dll

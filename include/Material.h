@@ -13,7 +13,7 @@ namespace be
         glm::vec3 diffuse;
         glm::vec3 specular;
         float shininess;
-
+ 
     protected:
         Material() = default;
     };

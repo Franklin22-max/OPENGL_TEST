@@ -1,0 +1,51 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+  "runs": [
+    {
+      "results": [],
+      "tool": {
+        "driver": {
+          "name": "PREfast",
+          "fullName": "PREfast Code Analysis",
+          "version": "14.33.31629.0",
+          "informationUri": "https://aka.ms/cpp/ca"
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "artifacts": [
+        {
+          "location": {
+            "uri": "file:///c:/users/franklin/documents/my programs/c++/visual_studios/opengl_test/dependencies/glad/src/glad.c"
+          },
+          "roles": [
+            "analysisTarget"
+          ],
+          "hashes": {
+            "sha-256": "91b71daf6cfa18d5916c632c63b36b4f36299c08c80e303ac9b91e79c49fc116"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/franklin/documents/my programs/c++/visual_studios/opengl_test/dependencies/glad/include/glad/glad.h"
+          },
+          "hashes": {
+            "sha-256": "feec969e2bb591d8cb1c813eec709d9245a524c85d5baac8c870bdb622f66ad1"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/franklin/documents/my programs/c++/visual_studios/opengl_test/dependencies/glad/include/khr/khrplatform.h"
+          },
+          "hashes": {
+            "sha-256": "7b1e01aaa7ad8f6fc34b5c7bdf79ebf5189bb09e2c4d2e79fc5d350623d11e83"
+          }
+        }
+      ]
+    }
+  ]
+}
