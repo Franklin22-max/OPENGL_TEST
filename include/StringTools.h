@@ -14,16 +14,12 @@ inline std::string strip_edge(const std::string src, char to_strip)
     int index1 = 0, index2 = src.length();
 
     for (; index1 < src.length(); index1++)
-    {
         if (src[index1] != to_strip)
             break;
-    }
 
     for (; index2 < src.length(); --index2)
-    {
         if (src[index2] != to_strip)
             break;
-    }
 
     return src.substr(index1, (index2 - index1 - 1));
 }

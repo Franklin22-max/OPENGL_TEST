@@ -1,8 +1,8 @@
 #ifndef __INDEX_BUFFER_H_INCLUDED
 #define __INDEX_BUFFER_H_INCLUDED
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "Common.h"
+
 
 
 struct bufferObject
@@ -19,18 +19,23 @@ struct bufferObject
     void bufferData(GLsizeiptr dataSize, const void* vertices, GLenum usage)
     {
         glBindBuffer(target, this->VBO);
-        glBufferData(target, dataSize, vertices,usage);
+        GLCall(glBufferData(target, dataSize, vertices,usage));
     }
 
     void Bind()
     {
-        glBindBuffer(target, this->VBO);
+        GLCall(glBindBuffer(target, this->VBO));
     }
 
     void unBind()
     {
-        glBindBuffer(target, 0);
+        GLCall(glBindBuffer(target, 0));
     }
+
+	void Delete()
+	{
+		glDeleteBuffers(1, &VBO);
+	}
 };
 
 
@@ -46,19 +51,24 @@ public:
     void vertexAttribPointer(GLuint index, GLint size,GLenum type,GLboolean normalized,GLsizei stride,const void* pointer)
     {
         glBindVertexArray(this->VAO);
-        glVertexAttribPointer(index,size,type,normalized,stride,pointer);
-        glEnableVertexAttribArray(index);
+        GLCall(glVertexAttribPointer(index,size,type,normalized,stride,pointer));
+        GLCall(glEnableVertexAttribArray(index));
     }
 
     void Bind()
     {
-        glBindVertexArray(this->VAO);
+        GLCall(glBindVertexArray(this->VAO));
     }
 
     void unBind()
     {
-        glBindVertexArray(0);
+        GLCall(glBindVertexArray(0));
     }
+
+	void Delete()
+	{
+		glDeleteBuffers(1, &VAO);
+	}
 };
 
 struct indexBuffer
@@ -66,29 +76,192 @@ struct indexBuffer
     GLuint EBO = 0;
     GLfloat* indices;
 
+	indexBuffer() = default;
     indexBuffer(GLfloat* indices, GLenum usage)
     :indices(indices)
     {
         glGenBuffers(1,&EBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,GL_STATIC_DRAW);
+        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO));
+        GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,GL_STATIC_DRAW));
     }
 
     void Bind()
     {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO));
     }
 
     void unBind()
     {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
     }
 
     void Draw(GLuint count)
     {
-        glDrawElements(GL_TRIANGLES,count,GL_FLOAT,indices);
+        GLCall(glDrawElements(GL_TRIANGLES,count,GL_FLOAT,indices));
     }
+
+	void Delete()
+	{
+		glDeleteBuffers(1, &EBO);
+	}
 };
+
+
+// used as frame buffer attachment as write only when sampling in not required
+// its internal format is the gl native formate making it faster than textures as FBO attachments
+class RenderBuffer
+{
+public:
+	GLuint rbo;
+	RenderBuffer(GLshort width, GLsizei height)
+	{
+		glGenRenderbuffers(1, &rbo);
+		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	}
+
+	void Bind()
+	{
+		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	}
+
+	void unBind()
+	{
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	}
+
+	void Delete()
+	{
+		glDeleteRenderbuffers(1,&rbo);
+	}
+};
+
+
+
+//					common parameters for framebuffer texture
+//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+// 
+// // texture binding for shador
+//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+
+/*
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+*/
+
+class FrameBuffer
+{
+	GLuint fbo;
+public:
+	FrameBuffer()
+	{
+		glGenFramebuffers(1, &fbo);
+	}
+
+	void Bind()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	}
+
+	void unBind()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+
+	void BindAttachements(GLuint textureID, GLuint rbo , GLenum Textureattachment = GL_COLOR_ATTACHMENT0, GLenum RBattachment = GL_DEPTH_STENCIL_ATTACHMENT)
+	{
+		Bind();
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, Textureattachment, GL_TEXTURE_2D, textureID, 0));
+
+		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+		GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, RBattachment, GL_RENDERBUFFER, rbo));
+
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			std::cout << "FrameBuffer Incomplete" << std::endl;
+		unBind();
+	}
+
+	void AttachTexture(GLuint textureID, GLenum attachment  = GL_COLOR_ATTACHMENT0)
+	{
+		Bind();
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, attachment , GL_TEXTURE_2D, textureID, 0));
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			std::cout << "FrameBuffer Incomplete" << std::endl;
+		unBind();
+	}
+
+	void AttachRenderBuffer(GLuint rbo)
+	{
+		Bind();
+		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+		GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo));
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			std::cout << "FrameBuffer Incomplete" << std::endl;
+		unBind();
+	}
+
+	void Delete()
+	{
+		glDeleteFramebuffers(1, &fbo);
+	}
+};
+
+
+
+
+class UniformBuffer
+{
+	GLuint ubo;
+	GLuint bindPoint;
+	std::string name;
+public:
+	UniformBuffer(GLuint bindPoint , std::string name, GLsizei size)
+		:bindPoint(bindPoint), name(name)
+	{
+		glGenBuffers(1, &ubo);
+		glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+		glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_STATIC_DRAW);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+		glBindBufferRange(GL_UNIFORM_BUFFER, bindPoint, ubo, 0, size);
+	}
+
+	void Bind()
+	{
+		glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+	}
+
+
+	void unBind()
+	{
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	}
+
+	void linkShader(GLuint shaderID)
+	{
+		GLCall(GLuint uniformBlockIndex = glGetUniformBlockIndex(shaderID, name.c_str()));
+		GLCall(glUniformBlockBinding(shaderID, uniformBlockIndex, bindPoint));
+	}
+
+	void Subdata(GLuint offset, GLsizei size,const void* data )
+	{
+		Bind();
+		GLCall(glBufferSubData(GL_UNIFORM_BUFFER,offset,size,data));
+		unBind();
+	}
+};
+
+
+
+
 
 
 #endif // __INDEX_BUFFER_H_INCLUDED

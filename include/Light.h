@@ -1,7 +1,7 @@
 #ifndef LIGHT_H_INCLUDED
 #define LIGHT_H_INCLUDED
 
-#include <glad/glad.h>
+#include "Common.h"
 #include <glm/glm.hpp>
 
     
@@ -30,17 +30,17 @@ struct DirectonLight : Light
     DirectonLight(glm::vec3 direction)
        :direction(direction)
     {
-        ambient = glm::vec3(0.1f, 0.1f, 0.1f);
-        diffuse = glm::vec3(0.5f , 0.5f, 0.5f);
-        specular = glm::vec3(0.5f , 0.5f, 0.5f);
+        ambient = glm::vec3(0.15f, 0.15f, 0.15f);
+        diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
+        specular = glm::vec3(0.5f, 0.5f, 0.5f);
     }
 
     DirectonLight()
     {
-        direction = glm::vec3(0, -1, 0);
-        ambient = glm::vec3(0.1f, 0.1f, 0.1f);
-        diffuse = glm::vec3(0.5f , 0.5f, 0.5f);
-        specular = glm::vec3(0.8f , 0.8f, 0.8f);
+        direction = glm::vec3(0, -0.5, -0.8660);
+        ambient = glm::vec3(0.15f, 0.15f, 0.15f);
+        diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+        specular = glm::vec3(1.0f, 1.0f, 1.0f);
     }
 };
 
@@ -63,18 +63,18 @@ struct PointLight : Light
     PointLight(glm::vec3 position, float constant = 1.0f, float linear = 0.007f, float quadratic = 0.0002)
         :position(position), constant(constant), linear(linear), quadratic(quadratic)
     {
-        ambient = glm::vec3(0.1f, 0.1f, 0.1f);
-        diffuse = glm::vec3(0.5f , 0.5f, 0.5f);
-        specular = glm::vec3(0.8f , 0.8f, 0.8f);
+        ambient = glm::vec3(0.15f, 0.15f, 0.15f);
+        diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+        specular = glm::vec3(1.0f, 1.0f, 1.0f);
     }
 
     PointLight(float constant = 1.0f, float linear = 0.007f, float quadratic = 0.0003)
         :constant(constant), linear(linear), quadratic(quadratic)
     {
         position = glm::vec3(0, 0, 0);
-        ambient = glm::vec3(0.1f, 0.1f, 0.1f);
-        diffuse = glm::vec3(0.5f , 0.5f, 0.5f);
-        specular = glm::vec3(0.8f , 0.8f, 0.8f);
+        ambient = glm::vec3(0.15f, 0.15f, 0.15f);
+        diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+        specular = glm::vec3(1.0f, 1.0f, 1.0f);
     }
 };
 
@@ -82,13 +82,12 @@ struct PointLight : Light
 struct SpotLight : Light
 {
     glm::vec3 position;
-
+    glm::vec3 direction;
     float cutOff;
     float outerCutOff;
-    glm::vec3 direction;
 
-    SpotLight(glm::vec3 position, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float cutOff = glm::cos(glm::radians(5.f)), float outerCutOff = glm::cos(glm::radians(25.f)))
-        : position(position), cutOff(cutOff), outerCutOff(outerCutOff)
+    SpotLight(glm::vec3 position, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, glm::vec3 direction, float cutOff = glm::cos(glm::radians(15.f)), float outerCutOff = glm::cos(glm::radians(30.f)))
+        : position(position), cutOff(cutOff), outerCutOff(outerCutOff), direction(direction)
     {
         this->ambient = ambient;
         this->diffuse = diffuse;
@@ -98,12 +97,12 @@ struct SpotLight : Light
     SpotLight(glm::vec3 position)
         :position(position)
     {
-        cutOff = glm::cos(glm::radians(5.f));
-        outerCutOff = glm::cos(glm::radians(25.f));
-
-        ambient = glm::vec3(0.1f, 0.1f, 0.1f);
-        diffuse = glm::vec3(0.5f , 0.5f, 0.5f);
-        specular = glm::vec3(0.8f , 0.8f, 0.8f);
+        cutOff = glm::cos(glm::radians(15.f));
+        outerCutOff = glm::cos(glm::radians(30.f));
+        direction = glm::vec3(0.0f, -1.f, -0.5);
+        ambient = glm::vec3(0.15f, 0.15f, 0.15f);
+        diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+        specular = glm::vec3(1.0f, 1.0f, 1.0f);
     }
 
     SpotLight(glm::vec3 position, float cutOff, float outerCutOff)
@@ -111,22 +110,23 @@ struct SpotLight : Light
     {
         this->cutOff = cutOff;
         this->outerCutOff = outerCutOff;
-
-        ambient = glm::vec3(0.1f, 0.1f, 0.1f);
-        diffuse = glm::vec3(0.5f , 0.5f, 0.5f);
-        specular = glm::vec3(0.8f , 0.8f, 0.8f);
+        direction = glm::vec3(0.0f, -1.f, -0.5);
+        ambient = glm::vec3(0.15f, 0.15f, 0.15f);
+        diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+        specular = glm::vec3(1.0f, 1.0f, 1.0f);
     }
 
     SpotLight()
     {
-        cutOff = glm::cos(glm::radians(5.f));
-        outerCutOff = glm::cos(glm::radians(25.f));
-
+        cutOff = glm::cos(glm::radians(15.f));
+        outerCutOff = glm::cos(glm::radians(30.f));
+        direction = glm::vec3(0.0f, -1.f, -0.5);
         position = glm::vec3(0, 0, 0);
-        ambient = glm::vec3(0.1f, 0.1f, 0.1f);
-        diffuse = glm::vec3(0.5f , 0.5f, 0.5f);
-        specular = glm::vec3(0.8f , 0.8f, 0.8f);
+        ambient = glm::vec3(0.15f, 0.15f, 0.15f);
+        diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+        specular = glm::vec3(1.0f, 1.0f, 1.0f);
     }
+
 };
 
 
