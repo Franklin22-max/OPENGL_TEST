@@ -24,6 +24,7 @@ enum class SHADER_TYPE : uint8_t
     BLOOM_SHADER,
     SKYBOX_SHADER,
     BASIC_SHADER,
+    BATCHED_SHADER
 };
 
 
@@ -37,10 +38,15 @@ public:
     static GLuint quadIBO;
     static GLuint quadVBO;
 
+    static int viewportX;
+    static int viewportY;
+    static int viewportWidth;
+    static int viewportHeight;
+
     static bool is_initialized;
     static glm::vec3 lastCamPos;
     static Camera* camera;
-    static std::vector<Model*> models;
+    static std::vector<BaseModel*> models;
     static std::unordered_map<SHADER_TYPE, Shader*> shaders;
     static std::vector<DirectonLight*> d_lights;
     static std::vector<PointLight*> p_lights;
@@ -54,13 +60,18 @@ public:
 
 public:
 
-    static void Init(Camera* camera, int shadowMapWidth = 1000, int shadowMapHeight = 1000)
+    static void Init(Camera* camera, int viewportX = 0, int viewportY = 0, int viewportWidth = 800, int viewportHeight = 600, int shadowMapWidth = 1000, int shadowMapHeight = 1000)
     {
-        if (!is_initialized)
-        {
+        
+        if (!is_initialized)        
+        {                           
             Renderer::camera = camera;
             Renderer::shadowMapWidth = shadowMapWidth;
             Renderer::shadowMapHeight = shadowMapHeight;
+            Renderer::viewportX = viewportX;
+            Renderer::viewportY = viewportY;
+            Renderer::viewportWidth = viewportWidth;
+            Renderer::viewportHeight = viewportHeight;
 
             depthTexture = GenDepthTexture(shadowMapWidth, shadowMapHeight, 0, NULL, {
                             TexturParameters(GL_TEXTURE_MIN_FILTER, GL_NEAREST),
@@ -89,6 +100,7 @@ public:
             shaders[SHADER_TYPE::SHADOW_DEPTH_SHADER] = new Shader("include/shader/shadowDepthVertexShader.vert", "include/shader/shadowDepthFragShader.frag");
             //shaders[SHADER_TYPE::BLOOM_SHADER] = new Shader("include/shader/bloomVertexShader.vert", "include/shader/bloomFragmentShader.frag");
             shaders[SHADER_TYPE::BASIC_SHADER] = new Shader("include/shader/basicVertexShader.vert", "include/shader/basicFragmentShader.frag");
+            shaders[SHADER_TYPE::BATCHED_SHADER] = new Shader("include/shader/batchedVertexShader.vert", "include/shader/batchedFragmentShader.frag");
 
             //                                  LOAD UP QUAD DATA
 
@@ -137,15 +149,14 @@ public:
     static void ShadowHandling()
     {
         glEnable(GL_DEPTH_TEST);
-        glViewport(0, 0, 800, 600);
         
         //bind shadow texture 
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, depthTexture);
 
-        shaders[SHADER_TYPE::OBJ_SHADER]->Use();
-        Shader::linkUnformMatrix4fv(*shaders[SHADER_TYPE::OBJ_SHADER], "lightVP", glm::value_ptr(lightVP));
-        Shader::linkUnform1i(*shaders[SHADER_TYPE::OBJ_SHADER], "shadowMap", 3);
+        shaders[SHADER_TYPE::BATCHED_SHADER]->Use();
+        Shader::linkUnformMatrix4fv(*shaders[SHADER_TYPE::BATCHED_SHADER], "lightVP", glm::value_ptr(lightVP));
+        Shader::linkUnform1i(*shaders[SHADER_TYPE::BATCHED_SHADER], "shadowMap", 3);
 
         for (int i = 0; i < models.size(); i++)
             models[i]->Draw();
@@ -177,9 +188,8 @@ public:
 
             // handle shadow post processing
             FillShadowDepthData();
-            glViewport(0, 0, 800, 600);
+            glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
             ShadowHandling();
-            
 
             lastCamPos = camera->Position;
         }
@@ -188,7 +198,7 @@ public:
 
     static void SortModels(glm::vec3& camPos) {
 
-        std::sort(models.begin(), models.end(), [camPos](const Model* _1, const Model* _2) {
+        std::sort(models.begin(), models.end(), [camPos](const BaseModel* _1, const BaseModel* _2) {
 
             glm::vec3 pos1 = { _1->model[3][0], _1->model[3][1], _1->model[3][2] };
             glm::vec3 pos2 = { _2->model[3][0], _2->model[3][1], _2->model[3][2] };
@@ -197,6 +207,11 @@ public:
         });
     }
 };
+
+inline int Renderer::viewportX;
+inline int Renderer::viewportY;
+inline int Renderer::viewportWidth;
+inline int Renderer::viewportHeight;
 
 inline std::stringstream Renderer::RenderStream;
 inline int Renderer::shadowMapWidth;
@@ -211,7 +226,7 @@ inline FrameBuffer* Renderer::shadowFBO = nullptr;
 inline glm::vec3 Renderer::lastCamPos;
 inline Camera* Renderer::camera;
 inline std::unordered_map<SHADER_TYPE, Shader*> Renderer::shaders;
-inline std::vector<Model*> Renderer::models;
+inline std::vector<BaseModel*> Renderer::models;
 inline std::vector<DirectonLight*> Renderer::d_lights;
 inline std::vector<PointLight*> Renderer::p_lights;
 inline std::vector<SpotLight*> Renderer::s_lights;

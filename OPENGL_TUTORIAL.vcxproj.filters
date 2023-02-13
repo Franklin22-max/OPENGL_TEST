@@ -125,6 +125,12 @@
     <ClInclude Include="Dependencies\vendors\imgui\imconfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\BatchedModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -138,5 +144,7 @@
     <None Include="include\shader\bloomVertexShader.vert" />
     <None Include="include\shader\bloomFragmentShader.frag" />
     <None Include="include\shader\basicFragmentShader.frag" />
+    <None Include="include\shader\batchedVertexShader.vert" />
+    <None Include="include\shader\batchedFragmentShader.frag" />
   </ItemGroup>
 </Project>

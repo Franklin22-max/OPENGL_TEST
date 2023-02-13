@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -105,7 +105,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -122,7 +122,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,7 +139,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -173,9 +173,11 @@
     <ClInclude Include="Dependencies\vendors\imgui\imstb_textedit.h" />
     <ClInclude Include="Dependencies\vendors\imgui\imstb_truetype.h" />
     <ClInclude Include="Dependencies\vendors\stb_image\stb_image.h" />
+    <ClInclude Include="include\BatchedModel.h" />
     <ClInclude Include="include\BufferOBJ.h" />
     <ClInclude Include="include\Camera.h" />
     <ClInclude Include="include\Common.h" />
+    <ClInclude Include="include\Mesh.h" />
     <ClInclude Include="include\PostProcessing.h" />
     <ClInclude Include="include\CustomShaders.h" />
     <ClInclude Include="include\shader\shadowDepthVertexShader.vert" />
@@ -194,6 +196,8 @@
     <None Include="..\assimp\assimp\bin\Release\assimp-vc143-mt.dll" />
     <None Include=".gitignore" />
     <None Include="include\shader\basicFragmentShader.frag" />
+    <None Include="include\shader\batchedFragmentShader.frag" />
+    <None Include="include\shader\batchedVertexShader.vert" />
     <None Include="include\shader\bloomFragmentShader.frag" />
     <None Include="include\shader\bloomVertexShader.vert" />
     <None Include="include\shader\kernel.frag" />

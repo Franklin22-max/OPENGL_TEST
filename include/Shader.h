@@ -155,21 +155,21 @@ public:
     {
         GLint _uniform = shader.GetUniformLocation(uniformName);
         if(_uniform > -1)
-            GLCall(glUniformMatrix4fv(_uniform, count, transpose, value));
+            glUniformMatrix4fv(_uniform, count, transpose, value);
     }
 
     static void linkUnformMatrix3fv(Shader& shader,const std::string uniformName, const GLfloat* value, GLsizei count = 1, GLboolean transpose = GL_FALSE)
     {
         GLint _uniform = shader.GetUniformLocation(uniformName);
         if (_uniform > -1)
-            GLCall(glUniformMatrix3fv(_uniform, count, transpose, value));
+            glUniformMatrix3fv(_uniform, count, transpose, value);
     }
 
     static void linkUnform3f(Shader& shader,const std::string uniformName, glm::vec3* value)
     {
         GLint _uniform = shader.GetUniformLocation(uniformName);
         if (_uniform > -1)
-            GLCall(glUniform3f(_uniform, value->x, value->y, value->z));
+            glUniform3f(_uniform, value->x, value->y, value->z);
     }
 
     static void linkUnform4f(Shader& shader,const std::string uniformName, glm::vec4* value)
@@ -183,21 +183,28 @@ public:
     {
         GLint _uniform = shader.GetUniformLocation(uniformName);
         if (_uniform > -1)
-            GLCall(glUniform2f(_uniform, value->x, value->y));
+            glUniform2f(_uniform, value->x, value->y);
     }
 
     static void linkUnform1f(Shader& shader,const std::string uniformName, float value)
     {
         GLint _uniform = shader.GetUniformLocation(uniformName);
         if(_uniform > -1)
-            GLCall(glUniform1f(_uniform, value));
+            glUniform1f(_uniform, value);
     }
 
     static void linkUnform1i(Shader& shader, const std::string uniformName, int value)
     {
         GLint _uniform = shader.GetUniformLocation(uniformName);
         if (_uniform > -1)
-            GLCall(glUniform1i(_uniform, value));
+            glUniform1i(_uniform, value);
+    }
+
+    static void linkUnform1iv(Shader& shader, const std::string uniformName, GLuint count, int* value)
+    {
+        GLint _uniform = shader.GetUniformLocation(uniformName);
+        if (_uniform > -1)
+            glUniform1iv(_uniform, count, value);
     }
 
 

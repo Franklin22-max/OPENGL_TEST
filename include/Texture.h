@@ -110,7 +110,11 @@ inline GLuint TextureFromFile(std::string name, std::string directory)
         }
 
         if (!image)
+        {
             std::cout << "Couldnt load texture  [ " + name + " ]" + "\n";
+            return -1;
+        }
+            
        
     }
         

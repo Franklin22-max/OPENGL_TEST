@@ -39,15 +39,13 @@ GLfloat frameRate = 60.0f; // Time of last frame
 GLfloat lastY = 300;
 GLfloat lastX = 400;
 
-float elapseTime = 0;
-
 //CAMERA
 Camera camera = Camera({ 20,200,500 });
 
 GLboolean firstMouse = true;
 
-uint32_t screenWidth = 800;
-uint32_t screenHeight = 600;
+uint32_t screenWidth = 1000;
+uint32_t screenHeight = 800;
 
 bool keys[1024];
 
@@ -150,7 +148,6 @@ int main(int args, char** argv)
 
     std::cout << glGetString(GL_VERSION);
 
-    glViewport(0, 0, screenWidth, screenHeight);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_STENCIL_TEST);
     glEnable(GL_CULL_FACE);
@@ -167,7 +164,7 @@ int main(int args, char** argv)
     camera.Rotate(-200, -300);
 
     // initialize Renderer, Do before calling any member
-    Renderer::Init(&camera);
+    Renderer::Init(&camera, 0,-100);
 
 
     // Skybox
@@ -178,31 +175,30 @@ int main(int args, char** argv)
 
     // Models
     Shader& object_shader = *Renderer::shaders[SHADER_TYPE::OBJ_SHADER];
-
-    Model seaHawk(R"(C:\Users\FRANKLIN\Documents\My 3D Models\SeaHawk\SeaHawk.obj)", object_shader, MODEL_TYPE::WORLD_OBJECT);
+    //
+    BatchModel seaHawk(R"(C:\Users\FRANKLIN\Documents\My 3D Models\SeaHawk\SeaHawk.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
     seaHawk.model = glm::translate(seaHawk.model, { 150.f,0.f,0 });
     
-
-    Model livingRoom(R"(C:\Users\FRANKLIN\Documents\My 3D Models\living_room\InteriorTest.obj)", object_shader, MODEL_TYPE::WORLD_OBJECT);
+    
+    BatchModel livingRoom(R"(C:\Users\FRANKLIN\Documents\My 3D Models\living_room\InteriorTest.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
     livingRoom.model = glm::translate(livingRoom.model, { 0.f,0.f,-50 });
     livingRoom.model = glm::scale(livingRoom.model, { 20.f,20.f,20.f });
-
-    Model tree(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Tree\Tree.obj)", object_shader, MODEL_TYPE::WORLD_OBJECT);
+    
+    BatchModel tree(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Tree\Tree.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
     tree.model = glm::translate(tree.model, {-50.f,0.f,50});
         tree.model = glm::scale(tree.model, { 20,20,20 });
-
-
-    Model plane(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Plane\Plane.obj)", object_shader, MODEL_TYPE::WORLD_OBJECT);
+    
+    
+    BatchModel plane(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Plane\Plane.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
     plane.model = glm::translate(plane.model, { 0.f,-1.f,-200 });
     plane.model = glm::scale(plane.model, { 500,500,500 });
-    //plane.model = glm::rotate(plane.model,glm::radians(45.f), { 0.f, 0.f, 1.f });
-
-    Model Cube(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Cube\Cube.obj)", object_shader, MODEL_TYPE::WORLD_OBJECT);
-    Cube.model = glm::translate(Cube.model, { 100.f,50.f,0 });
+    
+    BatchModel Cube(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Cube\Cube.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
+    Cube.model = glm::translate(Cube.model, { 0.f,0.f,0 });
     Cube.model = glm::rotate(Cube.model,glm::radians(45.f), {0.f,0.f,1.f});
     Cube.model = glm::scale(Cube.model, { 20,20,20 });
-
-    Model Cube2(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Cube\Cube.obj)", object_shader, MODEL_TYPE::WORLD_OBJECT);
+    
+    BatchModel Cube2(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Cube\Cube.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
     Cube2.model = glm::translate(Cube2.model, { 100.f,50.f,-100 });
     Cube2.model = glm::rotate(Cube2.model, glm::radians(45.f), { 0.f,0.f,1.f });
     Cube2.model = glm::scale(Cube2.model, { 20,20,20 });
@@ -210,11 +206,11 @@ int main(int args, char** argv)
     
 
     Renderer::models.push_back(&plane);
-    Renderer::models.push_back(&Cube);
-    Renderer::models.push_back(&Cube2);
+    //Renderer::models.push_back(&Cube);
+    //Renderer::models.push_back(&Cube2);
     //Renderer::models.push_back(&tree);
     Renderer::models.push_back(&seaHawk);
-    //Renderer::models.push_back(&livingRoom);
+    Renderer::models.push_back(&livingRoom);
 
     
     // light
@@ -243,6 +239,7 @@ int main(int args, char** argv)
     
     UniformBuffer uniformB(0, "Matrices", 2 * sizeof(glm::mat4));
     uniformB.linkShader(object_shader.Program());
+    uniformB.linkShader(Renderer::shaders[SHADER_TYPE::BATCHED_SHADER]->Program());
 
 
 
@@ -265,7 +262,7 @@ int main(int args, char** argv)
 
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    glBindBuffer(GL_VERTEX_ARRAY, 0);
+ 
     glBindVertexArray(0);
     
 
@@ -276,13 +273,6 @@ int main(int args, char** argv)
         GLfloat currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        elapseTime += deltaTime;
-
-        if (elapseTime > 0.3f)
-        {
-            glfwSetWindowTitle(window, to_string(1.f / deltaTime).c_str());
-            elapseTime = 0.0f;
-        }
         
         // Check and call events
         glfwPollEvents();
@@ -318,7 +308,7 @@ int main(int args, char** argv)
         }
 
         view = camera.GetViewMatrix();
-        projection = glm::perspective(glm::radians(camera.Zoom), (GLfloat)(screenWidth / screenHeight), 0.1f, 1000.0f);
+        projection = glm::perspective(glm::radians(camera.Zoom), (GLfloat)(Renderer::viewportWidth / Renderer::viewportHeight), 0.1f, 1000.0f);
        
         // lamp positin and translation
         glm::mat4 _view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
@@ -334,12 +324,11 @@ int main(int args, char** argv)
         uniformB.Subdata(0, sizeof(glm::mat4), glm::value_ptr(projection));
         uniformB.Subdata(sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
 
-        object_shader.Use();
-        Shader::linkSpotLight(object_shader, std::string("s_light1"), s_light);
+        Renderer::shaders[SHADER_TYPE::BATCHED_SHADER]->Use();
+        Shader::linkSpotLight(*Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], std::string("s_light1"), s_light);
 
         //Draw Models
         Renderer::DrawModels();
-
 
         if (show_depth_texture)
         {
