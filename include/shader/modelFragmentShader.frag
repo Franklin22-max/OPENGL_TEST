@@ -84,14 +84,7 @@ vec4 useSpotLight(SpotLight s_light, vec4 material_ambient, vec4 material_diffus
 void main()
 {
 
-    // point light
-    vec4 color1 = usePointLight(
-        p_light1,
-        texture(material.texture_diffuse1,fs_in.TexCoords),// ambient
-        texture(material.texture_diffuse1,fs_in.TexCoords),// diffuse
-        texture(material.texture_specular1,fs_in.TexCoords),// specular
-        material.shininess
-    );
+   
 
  
 
@@ -104,29 +97,6 @@ void main()
         material.shininess
     );
 
-    // point light
-    vec4 color3 = useDirectionalLight(
-        d_light1,
-        texture(material.texture_diffuse1,fs_in.TexCoords),// ambient
-        texture(material.texture_diffuse1,fs_in.TexCoords),// diffuse
-        texture(material.texture_specular1,fs_in.TexCoords),// specular
-        material.shininess
-    );
-
-
-
-    
-    // point light
-    vec4 color4 = usePointLight(
-        p_light1,
-        material.ambient,// ambient
-        material.diffuse,// diffuse
-        material.specular,// specular
-        material.shininess
-    );
-
- 
-
      // spot light
     vec4 color5 = useSpotLight(
         s_light1,
@@ -136,19 +106,11 @@ void main()
         material.shininess
     );
 
-    // point light
-    vec4 color6 = useDirectionalLight(
-        d_light1,
-        material.ambient,// ambient
-        material.diffuse,// diffuse
-        material.specular,// specular
-        material.shininess
-    );
-
+    
     if(material.numTextures > 0)
-      color = color1 + color2 + color3 + color4 + color5 + color6;
+      color = color2;
     else
-        color = color4 + color5 + color6;
+        color = color2 + color5;
 
 }
 

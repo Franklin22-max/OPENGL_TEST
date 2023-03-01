@@ -15,8 +15,14 @@ layout (std140) uniform Matrices
 };
 
 
-uniform mat4 model;
-uniform mat4 lightVP;
+struct Material
+{
+    vec4 diffuse;
+    vec4 ambient;
+    vec4 specular;
+    float shininess;
+};
+
 
 
 out VS_OUT {
@@ -29,7 +35,6 @@ out VS_OUT {
     int specularTextureID;
     int materialID;
 
-
     vec4 materialDiffuse;
     vec4 materialAmbient;
     vec4 materialSpecular;
@@ -38,28 +43,21 @@ out VS_OUT {
 } vs_out;
 
 
-struct Material
-{
-    vec4 diffuse;
-    vec4 ambient;
-    vec4 specular;
-    float shininess;
-};
+
+
+uniform mat4 model;
+uniform mat4 lightVP;
 
 
 uniform Material materials[32];
-
 void get_material_color(int id);
 
 void main()
 {
-
-    
-    
     gl_Position = projection * view * model * vec4(position,1.0f);
 
     vs_out.FragPos = vec3(model * vec4(position, 1.0f));// get fragment position in world space
-    vs_out.Normal = mat3(transpose(inverse(model))) * normal;
+    vs_out.Normal = normalize(mat3(transpose(inverse(model))) * normal);
     vs_out.TexCoords = vec2(texCoord.x, 1.0 - texCoord.y);
 
     vs_out.FragPosLightSpace =  lightVP * model * vec4(position,1.0f);
@@ -71,6 +69,7 @@ void main()
     // set the rigth material
     get_material_color(vs_out.materialID);
 
+
 }
 
 
@@ -79,7 +78,14 @@ void main()
 void get_material_color(int id)
 {
     Material m;
-    
+    if(id == -1)
+     {
+        vs_out.materialDiffuse = vec4(0.0);
+        vs_out.materialAmbient = vec4(0.0);
+        vs_out.materialSpecular = vec4(0.0);
+        vs_out.materialShininess = 0.0;
+        return;
+     }
 
     if(id == 0)
         m = materials[0];

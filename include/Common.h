@@ -12,13 +12,6 @@
     x;\
     ASSERT(GLLogCall(#x,__FILE__,__LINE__))
 
-
-
-//void GLClearError();
-
-//bool GLLogCall(const char* function, const char* file, int line);
-
-
 inline void GLClearError()
 {
     while (glGetError() != GL_NO_ERROR);

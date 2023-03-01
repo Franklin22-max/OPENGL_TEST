@@ -29,6 +29,9 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+
+#include "MyApp.h"
+
 #define PI 3.1415926535897932384626433832795
 
 
@@ -40,12 +43,12 @@ GLfloat lastY = 300;
 GLfloat lastX = 400;
 
 //CAMERA
-Camera camera = Camera({ 20,200,500 });
+Camera camera = Camera({ 0,50,100 });
 
 GLboolean firstMouse = true;
 
-uint32_t screenWidth = 1000;
-uint32_t screenHeight = 800;
+uint32_t windowWidth = 900;
+uint32_t windowHeight = 700;
 
 bool keys[1024];
 
@@ -58,7 +61,14 @@ SpotLight s_light = SpotLight();
 DirectonLight d_light;
 
 
+struct modelTransform
+{
+    glm::vec3 translate;
+    glm::vec3 rotate;
+    glm::vec3 scale;
+};
 
+std::vector<modelTransform> model_transforms;
 
 
 
@@ -67,6 +77,10 @@ void doRotation();
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
+
+
+void drawUI();
 
 
 
@@ -102,11 +116,10 @@ int main(int args, char** argv)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
     glfwWindowHint(GLFW_SAMPLES, 4);
 
-
-    GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "OpenGL", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "OpenGL", nullptr,nullptr);
 
     if (window == nullptr)
     {
@@ -139,6 +152,20 @@ int main(int args, char** argv)
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
+
+    ////ImFont* font = io.Fonts->AddFontFromFileTTF(R"(C:\Windows\Fonts\Adelyne.ttf)", 18.0f);
+    ////io.Fonts->GetTexDataAsRGBA32();
+    //unsigned char* texdata = NULL;
+    //int w, h;
+    //
+    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
+    ////io.Fonts->GetTexDataAsAlpha8(&texdata, &w, &h);
+    //IM_ASSERT(font != NULL);
+    //if (font)
+    //    ImGui::PushFont(font);
+    //else
+    //    std::cout << "Couldn't Load Font\n";
+
     if (!gladLoadGL())
     {
         std::cout << "Failed to initialize glad" << std::endl;
@@ -150,11 +177,12 @@ int main(int args, char** argv)
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_STENCIL_TEST);
-    glEnable(GL_CULL_FACE);
     glEnable(GL_FRAMEBUFFER_SRGB);
     glEnable(GL_MULTISAMPLE);
 
-
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -164,54 +192,75 @@ int main(int args, char** argv)
     camera.Rotate(-200, -300);
 
     // initialize Renderer, Do before calling any member
-    Renderer::Init(&camera, 0,-100);
+    Renderer::Init(&camera, 100,50);
 
 
     // Skybox
     Skybox starnight(R"(C:\Users\FRANKLIN\Documents\My 3D Models\sky_box\star_night)", {"right.png","left.png","top.png", "bottom.png", "front.png","back.png"});
 
 
-
+    modelTransform mt;
 
     // Models
     Shader& object_shader = *Renderer::shaders[SHADER_TYPE::OBJ_SHADER];
     //
-    BatchModel seaHawk(R"(C:\Users\FRANKLIN\Documents\My 3D Models\SeaHawk\SeaHawk.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
-    seaHawk.model = glm::translate(seaHawk.model, { 150.f,0.f,0 });
-    
-    
-    BatchModel livingRoom(R"(C:\Users\FRANKLIN\Documents\My 3D Models\living_room\InteriorTest.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
-    livingRoom.model = glm::translate(livingRoom.model, { 0.f,0.f,-50 });
-    livingRoom.model = glm::scale(livingRoom.model, { 20.f,20.f,20.f });
-    
-    BatchModel tree(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Tree\Tree.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
-    tree.model = glm::translate(tree.model, {-50.f,0.f,50});
-        tree.model = glm::scale(tree.model, { 20,20,20 });
+    //BatchModel seaHawk(R"(C:\Users\FRANKLIN\Documents\My 3D Models\SeaHawk\SeaHawk.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
+    //seaHawk.model = glm::translate(seaHawk.model, { 15.f,0.f,0 });
+    //seaHawk.model = glm::scale(seaHawk.model, { 0.2f,0.2f,0.2f });
+    //
+    //
+    //BatchModel livingRoom(R"(C:\Users\FRANKLIN\Documents\My 3D Models\living_room\InteriorTest.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
+    //livingRoom.model = glm::translate(livingRoom.model, { 0.f,0.f,-5 });
+    //
+    //BatchModel tree(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Tree\Tree.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
+    //tree.model = glm::translate(tree.model, {-5.f,0.f,5});
+    //tree.model = glm::scale(tree.model, { 20,20,20 });
+    //
+    BatchModel catLady(R"(C:\Users\FRANKLIN\Documents\My 3D Models\LadyCat\LadyCat.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
+    mt.translate = { 10.f,0.f,5 };
+    mt.scale = { 1,1,1 };
+    model_transforms.push_back(mt);
+
     
     
     BatchModel plane(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Plane\Plane.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
-    plane.model = glm::translate(plane.model, { 0.f,-1.f,-200 });
-    plane.model = glm::scale(plane.model, { 500,500,500 });
-    
-    BatchModel Cube(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Cube\Cube.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
-    Cube.model = glm::translate(Cube.model, { 0.f,0.f,0 });
-    Cube.model = glm::rotate(Cube.model,glm::radians(45.f), {0.f,0.f,1.f});
-    Cube.model = glm::scale(Cube.model, { 20,20,20 });
-    
-    BatchModel Cube2(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Cube\Cube.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
-    Cube2.model = glm::translate(Cube2.model, { 100.f,50.f,-100 });
-    Cube2.model = glm::rotate(Cube2.model, glm::radians(45.f), { 0.f,0.f,1.f });
-    Cube2.model = glm::scale(Cube2.model, { 20,20,20 });
+    mt.translate = { 0.f,-1.f,20 };
+    mt.scale = { 100,100,100 };
+    model_transforms.push_back(mt);
 
+    BatchModel Cube(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Cube\Cube.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
+    mt.translate = { 0.f,1.f,0 };
+    mt.rotate = { 0.f,0.f,1.f };
+    mt.scale = { 1.f,1.f,1.f };
+    model_transforms.push_back(mt);
+
+    BatchModel Sphere(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Sphere\Sphere.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
+    mt.translate = { 10.f,5.f,-10 };
+    mt.rotate = { 0.f,0.f,1.f };
+    mt.scale = { 1.f,1.f,1.f };
+    model_transforms.push_back(mt);
     
 
     Renderer::models.push_back(&plane);
-    //Renderer::models.push_back(&Cube);
-    //Renderer::models.push_back(&Cube2);
+    Renderer::models.push_back(&Cube);
+    Renderer::models.push_back(&Sphere);
+    Renderer::models.push_back(&catLady);
     //Renderer::models.push_back(&tree);
-    Renderer::models.push_back(&seaHawk);
-    Renderer::models.push_back(&livingRoom);
+    //Renderer::models.push_back(&seaHawk);
+    //Renderer::models.push_back(&livingRoom);
 
+
+    for (int i = 0; i < Renderer::models.size(); i++)
+    {
+        Renderer::models[i]->model = glm::identity<glm::mat4>();
+        Renderer::models[i]->model = glm::translate(Renderer::models[i]->model, model_transforms[i].translate);
+        Renderer::models[i]->model = glm::scale(Renderer::models[i]->model, model_transforms[i].scale);
+        Renderer::models[i]->model = glm::rotate(Renderer::models[i]->model, glm::radians(180.0f * deltaTime), model_transforms[i].rotate);
+    }
+        
+
+    glm::vec3 cubeTranslation = {0,1,0};
+    glm::vec3 sphereTranslation = {0,1,0};
     
     // light
     DirectonLight d_light;
@@ -265,11 +314,13 @@ int main(int args, char** argv)
  
     glBindVertexArray(0);
     
-
+    bool import = false;
     bool show_depth_texture = false;
     // Program loop
     while (!glfwWindowShouldClose(window))
     {
+        //for (int i = 0; i < 4000000; i++);
+
         GLfloat currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -289,30 +340,82 @@ int main(int args, char** argv)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
+
+        ImGuiWindowFlags window_flags = 0;
+        window_flags |= ImGuiWindowFlags_NoResize;
+        window_flags |= ImGuiWindowFlags_NoCollapse;
+        window_flags |= ImGuiWindowFlags_NoMove;
+        window_flags |= ImGuiWindowFlags_MenuBar;
+        window_flags |= ImGuiWindowFlags_NoTitleBar;
+
+
+        const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_Once);
+        ImGui::SetNextWindowSize(ImVec2(main_viewport->Size.x, 50), ImGuiCond_Always);
+
+
+        if (ImGui::Begin("OPENGL", 0,window_flags))   // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
-            ImGui::Begin("OPENGL");                          // Create a window called "Hello, world!" and append into it.
-            //ImGui::SliderFloat3("translateA", &translationA.x, 0.0f, 600.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::SliderFloat3("Camera Direction", &camera.Front.x, -1.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::SliderFloat3("Camera Position", &camera.Position.x, -600.0f, 600.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            
-            ImGui::SliderFloat3("spot light Direction", &s_light.direction.x, -1.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::SliderFloat3("spot light position", &s_light.position.x, -600.0f, 600.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::SliderFloat3("spot light ambient color", &s_light.ambient.x, 0.0f, 3.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::SliderFloat3("spot light diffuse color", &s_light.diffuse.x, 0.0f, 3.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::SliderFloat3("spot light specular color", &s_light.specular.x, 0.0f, 3.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            
-            ImGui::Checkbox("Show Depth Texture", &show_depth_texture);
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS), (Rstream %s)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate, Renderer::RenderStream.str().c_str());
+            ImGui::Spacing();
+
+            if (ImGui::BeginMenuBar())
+            {
+                
+
+                if (ImGui::BeginMenu("File"))
+                {
+                    if (ImGui::MenuItem("Open"))
+                        std::cout << "Loading File ...\n";
+
+                    if (ImGui::BeginMenu("Recent"))
+                    {
+                        ImGui::MenuItem("Blue");
+                        ImGui::MenuItem("Red");
+                        ImGui::EndMenu();
+                    }
+
+                    if (ImGui::MenuItem("Save"))
+                        std::cout << "Saving File ...\n";
+                    if (ImGui::MenuItem("Save As"))
+                        std::cout << "Saving File As ...\n";
+
+                    
+
+                    ImGui::EndMenu();
+                }
+
+                if (ImGui::BeginMenu("Camera and SpotLight"))
+                {
+                    //ImGui::SliderFloat3("translateA", &translationA.x, 0.0f, 600.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+                    ImGui::SliderFloat3("Camera Direction", &camera.Front.x, -1.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+                    ImGui::SliderFloat3("Camera Position", &camera.Position.x, -600.0f, 600.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+
+                    ImGui::SliderFloat3("spot light Direction", &s_light.direction.x, -1.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+                    ImGui::SliderFloat3("spot light position", &s_light.position.x, -600.0f, 600.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+                    ImGui::SliderFloat3("spot light ambient color", &s_light.ambient.x, 0.0f, 3.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+                    ImGui::SliderFloat3("spot light diffuse color", &s_light.diffuse.x, 0.0f, 3.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+                    ImGui::SliderFloat3("spot light specular color", &s_light.specular.x, 0.0f, 3.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+
+                    ImGui::Checkbox("Show Depth Texture", &show_depth_texture);
+                    ImGui::EndMenu();
+                }
+
+                ImGui::Text("FPS %.1f",ImGui::GetIO().Framerate);
+                ImGui::EndMenuBar();
+            }
             ImGui::End();
         }
 
+
+        drawUI();
+
         view = camera.GetViewMatrix();
+        //projection = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, 0.1f, 1000.0f);
         projection = glm::perspective(glm::radians(camera.Zoom), (GLfloat)(Renderer::viewportWidth / Renderer::viewportHeight), 0.1f, 1000.0f);
        
         // lamp positin and translation
         glm::mat4 _view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
-
+        
         Renderer::shaders[SHADER_TYPE::SKYBOX_SHADER]->Use();
         Shader::linkUnformMatrix4fv(*Renderer::shaders[SHADER_TYPE::SKYBOX_SHADER], "view", glm::value_ptr(_view), 1, GL_FALSE);
         Shader::linkUnformMatrix4fv(*Renderer::shaders[SHADER_TYPE::SKYBOX_SHADER], "projection", glm::value_ptr(projection), 1, GL_FALSE);
@@ -340,7 +443,7 @@ int main(int args, char** argv)
             GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
             glBindVertexArray(0);
         }
-        
+
 
         // Rendering
         ImGui::Render();
@@ -415,4 +518,62 @@ void doMovement()
         camera.Move(LEFT, deltaTime);
     if (keys[GLFW_KEY_D] == GLFW_PRESS)
         camera.Move(RIGHT, deltaTime);
+}
+
+
+
+void drawUI()
+{
+    ImGuiWindowFlags window_flags = 0;
+    window_flags |= ImGuiWindowFlags_NoResize;
+    window_flags |= ImGuiWindowFlags_NoCollapse;
+    window_flags |= ImGuiWindowFlags_NoMove;
+    //window_flags |= ImGuiWindowFlags_MenuBar;
+    //window_flags |= ImGuiWindowFlags_NoTitleBar;
+
+
+    const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(ImVec2(0, 50), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(200, windowHeight - 50), ImGuiCond_Always);
+
+    // left window
+    if (ImGui::Begin("Explorer", 0, window_flags))
+    {
+
+        for (int i = 0; i < Renderer::models.size(); i++)
+        {
+            if (ImGui::TreeNode(Renderer::models[i]->name.c_str()))
+            {
+                if (ImGui::BeginMenu("Transform"))
+                {
+                    Renderer::models[i]->model = glm::identity<glm::mat4>();
+                    
+                    ImGui::SliderFloat3(std::string("Position").c_str(), &model_transforms[i].translate.x, -300, 300);
+                    ImGui::SliderFloat3(std::string("Scale").c_str(), &model_transforms[i].scale.x, 0, 20);
+                    ImGui::SliderFloat3(std::string("Rotate").c_str(), &model_transforms[i].rotate.x, -1, 1);
+
+                    
+                    Renderer::models[i]->model = glm::translate(Renderer::models[i]->model, model_transforms[i].translate);
+                    Renderer::models[i]->model = glm::scale(Renderer::models[i]->model, model_transforms[i].scale);
+                    //Renderer::models[i]->model = glm::rotate(Renderer::models[i]->model,glm::radians(180.0f * deltaTime ), model_transforms[i].rotate);
+
+                    ImGui::EndMenu();
+                }
+
+                ImGui::TreePop();
+            }
+        }
+
+  
+        ImGui::End();
+    }
+
+
+    // buttom window
+    ImGui::SetNextWindowPos(ImVec2(0, windowHeight - 100), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(windowWidth, 100), ImGuiCond_Always);
+    if (ImGui::Begin("Logger", 0, window_flags))
+    {
+        ImGui::End();
+    }
 }

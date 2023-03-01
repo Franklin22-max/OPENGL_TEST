@@ -1,22 +1,6 @@
 #version 330 core
 
 
-in VS_OUT {
-    vec3 FragPos;
-    vec3 Normal;
-    vec2 TexCoords;
-    vec4 FragPosLightSpace;
-
-    int diffuseTextureID;
-    int specularTextureID;
-    int materialID;
-
-    vec4 materialDiffuse;
-    vec4 materialAmbient;
-    vec4 materialSpecular;
-    float materialShininess;
-} vs_in;
-
 
 struct SpotLight
 {
@@ -53,13 +37,29 @@ struct DirectionalLight
     vec3 specular;
 };
 
+in VS_OUT {
+    vec3 FragPos;
+    vec3 Normal;
+    vec2 TexCoords;
+    vec4 FragPosLightSpace;
+
+    int diffuseTextureID;
+    int specularTextureID;
+    int materialID;
+
+    vec4 materialDiffuse;
+    vec4 materialAmbient;
+    vec4 materialSpecular;
+    float materialShininess;
+} vs_in;
+
+
+
 
 uniform sampler2D samplers[32];
 
-
-uniform vec3 viewPos;
 uniform sampler2D shadowMap;
-
+vec3 viewPos;
 out vec4 color;
 
 uniform DirectionalLight d_light1;
@@ -77,20 +77,20 @@ vec4 useSpotLight(SpotLight s_light, vec4 material_ambient, vec4 material_diffus
 
 void main()
 {
+
     vec4 t_diffuse = get_texture(vs_in.diffuseTextureID);
     vec4 t_specular = get_texture(vs_in.specularTextureID);
-
+    
+    
     vec4 color1 = useSpotLight(s_light1, vs_in.materialAmbient, vs_in.materialDiffuse, vs_in.materialSpecular, vs_in.materialShininess);
     vec4 color2 = useSpotLight(s_light1, t_diffuse, t_diffuse, t_specular, vs_in.materialShininess);
-    vec4 color3 = useSpotLight(s_light1, vs_in.materialAmbient, vs_in.materialDiffuse, vs_in.materialSpecular, vs_in.materialShininess);
-    vec4 color4 = useSpotLight(s_light1, t_diffuse, t_diffuse, t_specular, vs_in.materialShininess);
-    vec4 color5 = useSpotLight(s_light1, vs_in.materialAmbient, vs_in.materialDiffuse, vs_in.materialSpecular, vs_in.materialShininess);
-    vec4 color6 = useSpotLight(s_light1, t_diffuse, t_diffuse, t_specular, vs_in.materialShininess);
-
+    
+    
     if(vs_in.diffuseTextureID != -1 &&  vs_in.materialDiffuse.r + vs_in.materialDiffuse.g + vs_in.materialDiffuse.b  == 0)
         color = vec4(vec3(color1),0.f) + color2;
     else 
         color = color1 + color2;
+    
 }
 
 
@@ -113,7 +113,7 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
     float currentDepth = projCoords.z;
 
     
-    float bias = max(0.005 * (1.0 - dot(normal, lightDir)), 0.0005);
+    float bias = max(0.0005 * (1.0 - dot(normal, lightDir)), 0.00005);
     // Check whether current frag pos is in shadow
     
 
@@ -145,7 +145,7 @@ vec4 useDirectionalLight(DirectionalLight d_light, vec4 material_ambient, vec4 m
     vec4 ambient = vec4(d_light.ambient,1.0f) * material_ambient;
 
     // Diffuse
-    vec3 normal = normalize(vs_in.Normal);
+    vec3 normal = vs_in.Normal;
     vec3 lightDir = normalize(-d_light.direction);
     float diff = max(dot(normal, lightDir), 0.0);
     vec4 diffuse = vec4(d_light.diffuse * diff,1.0f) * material_diffuse;
@@ -178,7 +178,7 @@ vec4 usePointLight(PointLight p_light, vec4 material_ambient, vec4 material_diff
     vec4 ambient = 0.15 * vec4(p_light.ambient,1.0f) * material_ambient;
 
     // Diffuse
-    vec3 normal = normalize(vs_in.Normal);
+    vec3 normal = vs_in.Normal;
     vec3 lightDir = normalize(p_light.position - vs_in.FragPos);
     float diff = max(dot(normal, lightDir), 0.0);
     vec4 diffuse = vec4(p_light.diffuse * diff,1.0f) * material_diffuse;
@@ -208,10 +208,6 @@ vec4 usePointLight(PointLight p_light, vec4 material_ambient, vec4 material_diff
 
 
 
-
-
-
-//                                              SPOT LIGHT
 vec4 useSpotLight(SpotLight s_light, vec4 material_ambient, vec4 material_diffuse, vec4 material_specular, float material_shininess)
 {
    vec3 lightDir = normalize(s_light.position - vs_in.FragPos);
@@ -258,6 +254,9 @@ vec4 useSpotLight(SpotLight s_light, vec4 material_ambient, vec4 material_diffus
 vec4 get_texture(int id)
 {
     vec4 color = vec4(0.0);
+
+    if(id == -1)
+        return color;
 
     if(id == 0)
         color = texture(samplers[0], vs_in.TexCoords);

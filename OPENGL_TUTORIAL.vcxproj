@@ -177,6 +177,7 @@
     <ClInclude Include="include\BufferOBJ.h" />
     <ClInclude Include="include\Camera.h" />
     <ClInclude Include="include\Common.h" />
+    <ClInclude Include="include\MyApp.h" />
     <ClInclude Include="include\Mesh.h" />
     <ClInclude Include="include\PostProcessing.h" />
     <ClInclude Include="include\CustomShaders.h" />

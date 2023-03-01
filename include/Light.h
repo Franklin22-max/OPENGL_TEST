@@ -86,7 +86,7 @@ struct SpotLight : Light
     float cutOff;
     float outerCutOff;
 
-    SpotLight(glm::vec3 position, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, glm::vec3 direction, float cutOff = glm::cos(glm::radians(15.f)), float outerCutOff = glm::cos(glm::radians(30.f)))
+    SpotLight(glm::vec3 position, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, glm::vec3 direction, float cutOff = glm::cos(glm::radians(5.f)), float outerCutOff = glm::cos(glm::radians(15.f)))
         : position(position), cutOff(cutOff), outerCutOff(outerCutOff), direction(direction)
     {
         this->ambient = ambient;
@@ -119,7 +119,7 @@ struct SpotLight : Light
     SpotLight()
     {
         cutOff = glm::cos(glm::radians(15.f));
-        outerCutOff = glm::cos(glm::radians(30.f));
+        outerCutOff = glm::cos(glm::radians(5.f));
         direction = glm::vec3(0.0f, -1.f, -0.5);
         position = glm::vec3(0, 0, 0);
         ambient = glm::vec3(0.15f, 0.15f, 0.15f);

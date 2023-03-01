@@ -121,6 +121,7 @@ public:
        
 
         GLfloat near_plane = 1.0f, far_plane = 700.f;
+        //glm::mat4 lightProjection = glm::ortho(-400.0f, 400.0f, -300.0f, 300.0f, 0.1f, 700.0f);;
         glm::mat4 lightProjection = glm::perspective(glm::radians(65.f), (GLfloat)shadowMapWidth / shadowMapHeight, near_plane, far_plane);
         glm::mat4 lightView = glm::lookAt(s_lights[0]->position, s_lights[0]->position + s_lights[0]->direction, { 0.0f, 1.0f, 0.0f });
 
@@ -151,12 +152,12 @@ public:
         glEnable(GL_DEPTH_TEST);
         
         //bind shadow texture 
-        glActiveTexture(GL_TEXTURE3);
+        glActiveTexture(GL_TEXTURE31);
         glBindTexture(GL_TEXTURE_2D, depthTexture);
 
         shaders[SHADER_TYPE::BATCHED_SHADER]->Use();
         Shader::linkUnformMatrix4fv(*shaders[SHADER_TYPE::BATCHED_SHADER], "lightVP", glm::value_ptr(lightVP));
-        Shader::linkUnform1i(*shaders[SHADER_TYPE::BATCHED_SHADER], "shadowMap", 3);
+        Shader::linkUnform1i(*shaders[SHADER_TYPE::BATCHED_SHADER], "shadowMap", 31);
 
         for (int i = 0; i < models.size(); i++)
             models[i]->Draw();
@@ -174,7 +175,7 @@ public:
     static void Clear()
     {
         // Rendering commands here
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClearColor(0.03f, 0.03f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 

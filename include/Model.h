@@ -42,6 +42,7 @@ public:
 	Shader& shader;
 	glm::mat4 model;
 	MODEL_TYPE type;
+	std::string name;
 
 	BaseModel(MODEL_TYPE type, Shader& shader)
 		:type(type), shader(shader) {}
@@ -118,6 +119,7 @@ public:
 			
 			
 			this->directory = path.substr(0, path.find_last_of(p.preferred_separator));
+			this->name = path.substr(path.find_last_of(p.preferred_separator) + 1, path.length());
 
 			this->processNode(scene->mRootNode, scene);
 		}
@@ -302,7 +304,7 @@ public:
 		for (auto& _batch : batches)
 		{
 			// bind materials to shader only when the alternative shader is not in use
-			if (alternativeShader == nullptr)
+			if (alternativeShader == nullptr )
 			{
 				for (int m = 0; m < _batch.materials.size(); m++)
 				{
@@ -320,10 +322,6 @@ public:
 				}
 			}
 
-
-			ImGui::Begin("OPENGL");
-			ImGui::Text("IndexCount: %d",_batch.indexCount);
-			ImGui::End();
 
 			// Draw mesh
 			glBindVertexArray(_batch.VAO);
@@ -363,6 +361,7 @@ private:
 
 
 		this->directory = path.substr(0, path.find_last_of(p.preferred_separator));
+		this->name = path.substr(path.find_last_of(p.preferred_separator) + 1, path.length());
 
 		this->processNode(scene->mRootNode, scene);
 	}
