@@ -159,6 +159,7 @@ public:
         Shader::linkUnformMatrix4fv(*shaders[SHADER_TYPE::BATCHED_SHADER], "lightVP", glm::value_ptr(lightVP));
         Shader::linkUnform1i(*shaders[SHADER_TYPE::BATCHED_SHADER], "shadowMap", 31);
 
+      
         for (int i = 0; i < models.size(); i++)
             models[i]->Draw();
     }
@@ -200,7 +201,7 @@ public:
     static void SortModels(glm::vec3& camPos) {
 
         std::sort(models.begin(), models.end(), [camPos](const BaseModel* _1, const BaseModel* _2) {
-
+            // sort using the position coordinate in the model matrix
             glm::vec3 pos1 = { _1->model[3][0], _1->model[3][1], _1->model[3][2] };
             glm::vec3 pos2 = { _2->model[3][0], _2->model[3][1], _2->model[3][2] };
 

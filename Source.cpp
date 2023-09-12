@@ -205,29 +205,30 @@ int main(int args, char** argv)
     Shader& object_shader = *Renderer::shaders[SHADER_TYPE::OBJ_SHADER];
     //
     //BatchModel seaHawk(R"(C:\Users\FRANKLIN\Documents\My 3D Models\SeaHawk\SeaHawk.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
-    //seaHawk.model = glm::translate(seaHawk.model, { 15.f,0.f,0 });
-    //seaHawk.model = glm::scale(seaHawk.model, { 0.2f,0.2f,0.2f });
+    //mt.translate = { 0.2f,0.2f,0.2f };
+    //mt.scale = { 0.4f,0.4f,0.4f };
+    //model_transforms.push_back(mt);
     //
     //
     //BatchModel livingRoom(R"(C:\Users\FRANKLIN\Documents\My 3D Models\living_room\InteriorTest.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
     //livingRoom.model = glm::translate(livingRoom.model, { 0.f,0.f,-5 });
     //
-    //BatchModel tree(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Tree\Tree.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
-    //tree.model = glm::translate(tree.model, {-5.f,0.f,5});
-    //tree.model = glm::scale(tree.model, { 20,20,20 });
-    //
-    BatchModel catLady(R"(C:\Users\FRANKLIN\Documents\My 3D Models\LadyCat\LadyCat.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
+    /*BatchModel tree(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Tree\Tree.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
     mt.translate = { 10.f,0.f,5 };
-    mt.scale = { 1,1,1 };
-    model_transforms.push_back(mt);
-
-    
-    
+    mt.scale = { 20,20,20 };
+    model_transforms.push_back(mt);*/
+   
     BatchModel plane(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Plane\Plane.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
     mt.translate = { 0.f,-1.f,20 };
     mt.scale = { 100,100,100 };
     model_transforms.push_back(mt);
 
+    BatchModel catLady(R"(C:\Users\FRANKLIN\Documents\My 3D Models\LadyCat\LadyCat.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
+    mt.translate = { -5.f,0.f,5 };
+    mt.scale = { 1,1,1 };
+    model_transforms.push_back(mt);
+
+    /*
     BatchModel Cube(R"(C:\Users\FRANKLIN\Documents\My 3D Models\Cube\Cube.obj)", *Renderer::shaders[SHADER_TYPE::BATCHED_SHADER], MODEL_TYPE::WORLD_OBJECT);
     mt.translate = { 0.f,1.f,0 };
     mt.rotate = { 0.f,0.f,1.f };
@@ -239,15 +240,16 @@ int main(int args, char** argv)
     mt.rotate = { 0.f,0.f,1.f };
     mt.scale = { 1.f,1.f,1.f };
     model_transforms.push_back(mt);
-    
+    */
 
-    Renderer::models.push_back(&plane);
-    Renderer::models.push_back(&Cube);
-    Renderer::models.push_back(&Sphere);
-    Renderer::models.push_back(&catLady);
-    //Renderer::models.push_back(&tree);
     //Renderer::models.push_back(&seaHawk);
     //Renderer::models.push_back(&livingRoom);
+    Renderer::models.push_back(&plane);
+    //Renderer::models.push_back(&Cube);
+    //Renderer::models.push_back(&Sphere);
+    Renderer::models.push_back(&catLady);
+    //Renderer::models.push_back(&tree);
+    
 
 
     for (int i = 0; i < Renderer::models.size(); i++)

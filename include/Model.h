@@ -38,8 +38,8 @@ enum class MODEL_TYPE : uint8_t
 class BaseModel
 {
 public:
-	// model matrix for this model
 	Shader& shader;
+	// model matrix for this model
 	glm::mat4 model;
 	MODEL_TYPE type;
 	std::string name;
@@ -250,6 +250,19 @@ public:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 class BatchModel : public BaseModel
 {
 protected:
@@ -351,8 +364,6 @@ private:
 			std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
 			return;
 		}
-
-
 
 		std::filesystem::path p(path);
 		p.make_preferred();
@@ -560,7 +571,7 @@ private:
 		};
 		
 
-		int extra_texture = 0;
+		int extra_texture;
 		int mesh_offset = 0;
 		// new_batch
 		batch new_batch;
@@ -656,14 +667,21 @@ private:
 				batches.push_back(new_batch);
 				
 				new_batch = batch();
-				// shift index back to revisit mesh at the index given that it was not included in batch in this iteration
+				// shift index back to revisit mesh at this index given that it was not included in batch during this iteration
 				i -= 1;
 			}
 		}
 
 		std::cout << "Batch: " << batches.size() << ", Mesh: " << meshes.size()<<", Loaded Texture: "<<loaded_textures.size() << "\n";
-		for(int i = 0; i < batches.size(); i++)
-			std::cout << "Textures in Bath: " << batches[i].textures.size() << " , Materials in Batch: " << batches[i].materials.size() << " , Meshes in Bash: " << batches[i].size << "\n";
+		int vertexCount = 0;
+
+		for (int i = 0; i < batches.size(); i++)
+		{
+			for(int i = 0; i < meshes.size(); i++)
+				vertexCount += meshes[i].vertices.size();
+			std::cout << "Textures in Bath: " << batches[i].textures.size() << " , Materials in Batch: " << batches[i].materials.size() << " , Meshes in Bash: " << batches[i].size << "VertexCount: "<< vertexCount << "\n";
+		}
+		std::cout << "VertexCount: " << vertexCount << "\n";
 
 		// since loaded_texture and loaded_material are obsolete we clean them
 		loaded_material.erase(loaded_material.begin(), loaded_material.end());
@@ -744,6 +762,19 @@ private:
 			GLCall(glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, sizeof(BatchMesh::Vertex), (GLvoid*)offsetof(BatchMesh::Vertex, materialID)));
 			
 			glBindVertexArray(0);
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 			delete vertexBuffer;
 			delete indexBuffer;

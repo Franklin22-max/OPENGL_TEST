@@ -77,7 +77,6 @@ vec4 useSpotLight(SpotLight s_light, vec4 material_ambient, vec4 material_diffus
 
 void main()
 {
-
     vec4 t_diffuse = get_texture(vs_in.diffuseTextureID);
     vec4 t_specular = get_texture(vs_in.specularTextureID);
     
