@@ -29,7 +29,6 @@ inline GLuint GenColorTexture(GLsizei width, GLsizei height, GLint BMP = 0, unsi
     glBindTexture(GL_TEXTURE_2D, texture);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, BMP, GL_RGBA, GL_UNSIGNED_BYTE, image);
-
  
     for(int i=0; i < Texparams.size(); i++)
         glTexParameteri(GL_TEXTURE_2D, Texparams[i].pname, Texparams[i].param);
@@ -54,8 +53,6 @@ inline GLuint GenDepthTexture(GLsizei width, GLsizei height, GLint BMP = 0, unsi
 
     for (int i = 0; i < Texparams.size(); i++)
         glTexParameteri(GL_TEXTURE_2D, Texparams[i].pname, Texparams[i].param);
-
-    //glGenerateMipmap(GL_TEXTURE_2D);
 
     glBindTexture(GL_TEXTURE_2D, 0);
     return texture;
